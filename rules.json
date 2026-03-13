@@ -1,134 +1,288 @@
 [
-    {
-        "id":"pastries",
-        "priority": 1, 
-        "condition": 
-        {
-            "is_shelf_stable": true,
-            "contain_meat": false,
-            "processing_state": ["fully_cooked"]
-        },
-        "restriction": 
-        {
-            "consumption": "for personal consumption"
-        },
-        "origin_country": [],
-        "verdict": "likely_allowed",
-        "reason": "Biscuits, bread, cakes, pastries, Christmas cake, and Christmas pudding are generally allowed if restrictions are met."
-    },
-    {
-        "id": "dairy",
-        "priority": 5,
-        "condition": 
-        {
-            "contain_dairy": true,
-            "is_commercial": true
-        },
-        "restriction": 
-        {
-            "limitation": "10 kilograms or 10 litres",
-            "comsumption": "for human consumption"
-        },
-        "origin_country": 
-        [
-            "Australia", "Austria", "Belgium", "Bosnia and Herzegovina", "Canada", "Chile", "Croatia", "Czechia (Czech Republic)", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Iceland", "Ireland, Republic of", "Italy", "Japan", "Latvia", "Lithuania", "Luxembourg", "Malta", "Mexico", "Montenegro", "Netherlands", "New Caledonia", "New Zealand", "North Macedonia, Republic of", "Norway", "Poland", "Portugal", "Romania", "San Marino", "Serbia", "Singapore", "Slovenia", "Spain", "Sweden", "Switzerland", "United Kingdom", "United States of America", "Vanuatu"
-        ],
-        "verdict": "declare",
-        "reason": "Cheese, butter, and other dairy products are permitted. But these products must be declared and inspected on arrival. Products that do not meet import conditions will be exported or destroyed at the importer's expense."
-    },
-    {
-        "id": "rice",
-        "priority": 10,
-        "condition": 
-        {
-            "contain_rice": true,
-            "is_processed": false
-        },
-        "restriction": {},
-        "origin_country": [],
-        "verdict": "not_allowed",
-        "reason": "Raw (uncooked) rice is not permitted and will be destroyed."
-    },
-    {
-        "id": "rice_product",
-        "priority": 6,
-        "condition": 
-        {
-            "contain_rice": true,
-            "is_processed": true,
-            "processing_state": 
-            [
-                "roasted",
-                "parboiled",
-                "puffed",
-                "microwave_ready",
-                "flaked",
-                "flour"
-            ]
-        },
-        "origin_country": [],
-        "verdict": "declare",
-        "reason": "Other processed rice products (including roasted, parboiled or puffed rice, microwave ready rice pouches, rice flakes and rice flour) must meet import conditions."
-    },
-    {
-        "id": "chocolate_confectionery",
-        "priority": 2,
-        "condition": {
-            "is_commercially": true,
-            "contain_meat": false
-        },
-        "restriction": {
-            "consumption": "for personal import"
-        },
-        "origin_country": [],
-        "verdict": "likely_allowed",
-        "reason": "Commercially prepared and packaged chocolate or confectionery (including fudge, toffees, boiled sweets, peppermints, marshmallows, and liquorice) are allowed if they do not contain meat."
-    },
-    {
-        "id": "biscuits_cakes_pastries",
-        "priority": 1,
-        "condition": {
-            "is_shelf_stable": true,
-            "contain_meat": false,
-            "processing_state": ["fully_cooked"]
-        },
-        "restriction": {
-            "consumption": "for personal consumption",
-            "fillings_toppings": "must be cooked with the cake"
-        },
-        "origin_country": [],
-        "verdict": "likely_allowed",
-        "reason": "Biscuits, bread, cakes, pastries, Christmas cake, and Christmas pudding are allowed if fully cooked, shelf stable, meat-free, and fillings/toppings are cooked with the cake."
-    },
-    {
-        "id": "vegetable_seed_oil",
-        "priority": 3,
-        "condition": {
-            "type": ["peanut", "safflower", "linseed", "olive", "cottonseed"],
-            "is_clean": true,
-            "free_of_contaminants": true
-        },
-        "restriction": {},
-        "origin_country": [],
-        "verdict": "likely_allowed",
-        "reason": "Vegetable and seed oils are allowed if clean and free of contaminant seed, soil, and animal or plant debris."
-    },
-    {
-        "id": "maple_syrup",
-        "priority": 4,
-        "condition": {},
-        "restriction": {},
-        "origin_country": [],
-        "verdict": "likely_allowed",
-        "reason": "Maple syrup is allowed into Australia."
-    },
-    {
-        "id": "food_plane_ship",
-        "priority": 9,
-        "condition": {},
-        "restriction": {},
-        "origin_country": [],
-        "verdict": "not_allowed",
-        "reason": "Food from the plane or ship is not permitted to be brought into Australia."
+  {
+    "item": "biscuits_bread_cakes_pastries",
+    "verdict": "BRING_IT",
+    "reason": "Fully cooked shelf-stable cakes, biscuits and pastries without meat are allowed for personal consumption.",
+    "conditions": {
+      "fully_cooked": true,
+      "shelf_stable": true,
+      "contains_meat": false,
+      "personal_use": true
     }
+  },
+  {
+    "item": "dairy_products",
+    "verdict": "DECLARE_IT",
+    "reason": "Cheese, butter and dairy products must be declared and inspected on arrival.",
+    "conditions": {
+      "commercial_packaging": true,
+      "fmd_free_country": true,
+      "max_quantity_kg": 10,
+      "human_consumption": true
+    }
+  },
+  {
+    "item": "chocolate_confectionery",
+    "verdict": "BRING_IT",
+    "reason": "Chocolate and confectionery are generally allowed for personal consumption."
+  },
+  {
+    "item": "roasted_coffee",
+    "verdict": "BRING_IT",
+    "reason": "CRoasted coffee is permitted into Australia for personal use if it is roasted, ground or processed into instant coffee.",
+    "conditions": {
+      "instant_use": true,
+      "max_quantity_kg": 10
+    }
+  },
+  {
+    "item": "kopi_luwak_cviet_coffee",
+    "verdict": "DECLARE_IT",
+    "reason": "Kopi Luwak/Civet coffee must be declared and inspected on arrival.",
+    "conditions": {
+      "commercial_packaging": true,
+      "max_quantity_kg": 1,
+      "personal_use": true,
+      "roasted": true
+    }
+  },
+  {
+    "item": "green_coffee",
+    "verdict": "DECLARE_IT",
+    "reason": "Green coffee is allowed into Australia, however the goods must be accompanied by a phytosanitary certificate.",
+    "conditions": {
+      "certificate_required": true
+    }
+  },
+  {
+    "item": "dried_herbs_herbal_teas",
+    "verdict": "DECLARE_IT",
+    "reason": "Dried herbs and loose herbal teas must be declared and may be inspected for biosecurity risks.",
+    "conditions": {
+      "plant_origin_only": true,
+      "commercial_packaging": true,
+      "max_weight_kg": 1
+    }
+  },
+  {
+    "item": "fish_non_salmonid",
+    "verdict": "DECLARE_IT",
+    "reason": "Fish products must be declared and may be inspected to confirm they meet import conditions.",
+    "conditions": {
+      "commercial_packaging": true,
+      "shelf_stable": true,
+      "max_weight_kg": 10,
+      "canned": true,
+      "retorted": true
+    }
+  },
+  {
+    "item": "fish_salmon_trout",
+    "verdict": "DECLARE_IT",
+    "reason": "Salmon and trout products must be declared and inspected due to biosecurity risk.",
+    "conditions": {
+      "commercial_packaging": true,
+      "max_weight_kg": 5,
+      "canned": true,
+      "retorted": true
+    }
+  },
+  {
+    "item": "food_from_plane_or_ship",
+    "verdict": "DONT_BRING",
+    "reason": "Food taken from aircraft or ships cannot be brought into Australia."
+  },
+  {
+    "item": "honey_products",
+    "verdict": "DECLARE_IT",
+    "reason": "Honey products must be declared and inspected to ensure they are free from contamination."
+  },
+  {
+    "item": "breast_milk",
+    "verdict": "DECLARE_IT",
+    "reason": "Breast milk must be declared and may only be imported in limited quantities for infant use.",
+    "conditions": {
+      "personal_use_infant": true,
+      "max_volume_l": 10
+    }
+  },
+  {
+    "item": "instant_beverage_sachets",
+    "verdict": "DECLARE_IT",
+    "reason": "Instant beverage sachets containing dairy must be declared and may be inspected.",
+    "conditions": {
+      "commercial_packaging": true,
+      "shelf_stable": true,
+      "max_weight_kg": 10,
+      "instant_use": true
+    }
+  },
+  {
+    "item": "infant_formula",
+    "verdict": "DECLARE_IT",
+    "reason": "Infant formula must be declared and must meet specific country-of-origin requirements.",
+    "conditions": {
+      "commercial_packaging": true,
+      "fmd_free_country": true
+    }
+  },
+  {
+    "item": "juice_soft_drink",
+    "verdict": "DECLARE_IT",
+    "reason": "Juice and soft drinks must be declared to confirm they are commercially packaged.",
+    "conditions": {
+      "commercial_packaging": true
+    }
+  },
+  {
+    "item": "maple_syrup",
+    "verdict": "BRING_IT",
+    "reason": "Maple syrup is allowed into Australia for personal use."
+  },
+  {
+    "item": "meat_products",
+    "verdict": "DECLARE_IT",
+    "reason": "Meat products have strict biosecurity controls and must always be declared."
+  },
+  {
+    "item": "noodles_pasta",
+    "verdict": "DECLARE_IT",
+    "reason": "Noodles or pasta must be declared to verify ingredients and packaging.",
+    "conditions": {
+      "plant_based": true,
+      "commercial_packaging": true,
+      "shelf_stable": true
+    }
+  },
+  {
+    "item": "nuts",
+    "verdict": "DECLARE_IT",
+    "reason": "Nuts must be declared and may be inspected to ensure they meet processing requirements.",
+    "conditions": {
+      "commercial_packaging": true,
+      "processed": true
+    }
+  },
+  {
+    "item": "vegetable_oils",
+    "verdict": "BRING_IT",
+    "reason": "Vegetable and seed oils are allowed if free from contamination."
+  },
+  {
+    "item": "pepper",
+    "verdict": "DECLARE_IT",
+    "reason": "Pepper must be declared and labelled with the botanical name of the permitted species.",
+    "conditions": {
+      "commercial_packaging": true,
+      "botanical_label": true
+    }
+  },
+  {
+    "item": "pet_food",
+    "verdict": "DECLARE_IT",
+    "reason": "Pet food requires an import permit or documentation and must be declared.",
+    "conditions": {
+      "import_permit_required": true
+    }
+  },
+  {
+    "item": "prawns_products",
+    "verdict": "DECLARE_IT",
+    "reason": "Prawns and prawn products must be declared and may require specific permits."
+  },
+  {
+    "item": "preserved_fruit_vegetables",
+    "verdict": "DECLARE_IT",
+    "reason": "Preserved fruit and vegetables must be declared to confirm acceptable preservation methods.",
+    "conditions": {
+      "shelf_stable": true,
+      "canned": true
+    }
+  },
+  {
+    "item": "raw_rice",
+    "verdict": "DONT_BRING",
+    "reason": "Raw (uncooked) rice is not permitted and will be destroyed.",
+    "conditions": {
+      "processed": false
+    }
+  },
+  {
+    "item": "rice",
+    "verdict": "DECLARE_IT",
+    "conditions": {
+      "processed": true
+    },
+    "reason": "Rice must be declared due to potential biosecurity risks."
+  },
+  {
+    "item": "sauces",
+    "verdict": "DECLARE_IT",
+    "reason": "Sauces and curry pastes must be declared and confirmed to be shelf stable and commercially packaged.",
+    "conditions": {
+      "commercial_packaging": true,
+      "shelf_stable": true
+    }
+  },
+  {
+    "item": "seafood_shellfish_snails",
+    "verdict": "DECLARE_IT",
+    "reason": "Seafood, shellfish and snails must be declared and inspected for biosecurity compliance."
+  },
+  {
+    "item": "spices",
+    "verdict": "DECLARE_IT",
+    "reason": "Spices must be declared and inspected to ensure they are free from pests and contaminants.",
+    "conditions": {
+      "plant_based": true,
+      "clean_packaging": true,
+      "are_not": ["cumin", "coriander", "fennel", "dried chillies", "dried capsicum"],
+      "dried": true
+    }
+  },
+  {
+    "item": "black_green_tea",
+    "verdict": "DECLARE_IT",
+    "reason": "Tea products must be declared and may be inspected for contamination.",
+    "conditions": {
+      "clean_packaging": true
+    }
+  },
+  {
+    "item": "herbal_tea",
+    "verdict": "DECLARE_IT",
+    "reason": "Tea products must be declared and may be inspected for contamination.",
+    "conditions": {
+      "commercial_packaging": true,
+      "plant_based": true,
+      "dried": true,
+      "max_quantity_kg": 1
+    }
+  },
+  {
+    "item": "vitamins_supplements",
+    "verdict": "DECLARE_IT",
+    "reason": "Vitamins and supplements must be declared and limited to personal use quantities.",
+    "conditions": {
+      "commercial_packaging": true,
+      "max_supply_months": 3,
+      "human_consumption": true
+    }
+  },
+  {
+    "item": "wheat",
+    "verdict": "DECLARE_IT",
+    "reason": "Wheat must be declared and is only allowed if commercially milled.",
+    "conditions": {
+      "commercially_milled": true
+    }
+  },
+  {
+    "item": "whole_eggs",
+    "verdict": "DECLARE_IT",
+    "reason": "Whole eggs require an import permit and must be declared.",
+    "conditions": {
+      "import_permit_required": true
+    }
+  }
 ]
