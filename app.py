@@ -193,6 +193,118 @@ Output fields:
     return data
 
 
+def classify_ingredients_to_categories(ingredients_raw: list[str]):
+    """
+    Classify ingredients into 7 predefined categories.
+    Returns booleans + matched ingredients per category.
+    """
+    schema = {
+        "type": "object",
+        "properties": {
+            "categories": {
+                "type": "object",
+                "properties": {
+                    "Meat products": {"type": "boolean"},
+                    "Dairy / egg products": {"type": "boolean"},
+                    "Seafood products": {"type": "boolean"},
+                    "Plant materials": {"type": "boolean"},
+                    "Seeds / grains / nuts": {"type": "boolean"},
+                    "Processed packaged foods": {"type": "boolean"},
+                    "Mixed foods": {"type": "boolean"},
+                },
+                "required": [
+                    "Meat products",
+                    "Dairy / egg products",
+                    "Seafood products",
+                    "Plant materials",
+                    "Seeds / grains / nuts",
+                    "Processed packaged foods",
+                    "Mixed foods",
+                ],
+                "additionalProperties": False,
+            },
+            "category_matches": {
+                "type": "object",
+                "properties": {
+                    "Meat products": {"type": "array", "items": {"type": "string"}},
+                    "Dairy / egg products": {"type": "array", "items": {"type": "string"}},
+                    "Seafood products": {"type": "array", "items": {"type": "string"}},
+                    "Plant materials": {"type": "array", "items": {"type": "string"}},
+                    "Seeds / grains / nuts": {"type": "array", "items": {"type": "string"}},
+                    "Processed packaged foods": {"type": "array", "items": {"type": "string"}},
+                    "Mixed foods": {"type": "array", "items": {"type": "string"}},
+                },
+                "required": [
+                    "Meat products",
+                    "Dairy / egg products",
+                    "Seafood products",
+                    "Plant materials",
+                    "Seeds / grains / nuts",
+                    "Processed packaged foods",
+                    "Mixed foods",
+                ],
+                "additionalProperties": False,
+            },
+            "category_reason": {
+                "type": "string",
+            },
+        },
+        "required": ["categories", "category_matches", "category_reason"],
+        "additionalProperties": False,
+    }
+
+    prompt = f"""
+You are a food ingredient categorization assistant.
+
+Your task:
+Given a list of ingredients, assign them into these 7 categories:
+
+1. Meat products
+2. Dairy / egg products
+3. Seafood products
+4. Plant materials
+5. Seeds / grains / nuts
+6. Processed packaged foods
+7. Mixed foods
+
+Definitions:
+- Meat products: meat or poultry ingredients such as chicken, beef, pork, lamb, bacon, ham, gelatin from animal sources.
+- Dairy / egg products: milk, cheese, butter, cream, whey, yogurt, casein, egg, egg yolk, egg white, mayonnaise when clearly egg-based.
+- Seafood products: fish, shrimp, prawn, squid, crab, shellfish, anchovy, oyster, tuna, salmon, fish sauce, oyster sauce.
+- Plant materials: fruits, vegetables, herbs, spices, legumes, mushrooms, cocoa, sugar, plant oils, seaweed only if clearly used as a plant-like ingredient rather than seafood.
+- Seeds / grains / nuts: wheat, flour, rice, oats, corn, barley, quinoa, rye, sesame, almond, peanut, cashew, walnut, chia, sunflower seed.
+- Processed packaged foods: ingredients that are themselves packaged industrial food products, such as instant noodles, biscuits, cereal bars, chips, candy, canned soup, seasoning sachets, processed snack crumbs.
+- Mixed foods: ingredients that are composite prepared foods containing multiple components, such as curry paste, dumpling filling, burger patty, sausage roll filling, salad dressing, sandwich cookie, chocolate spread.
+
+Rules:
+- Return all 7 categories.
+- For each category, output true if at least one ingredient belongs to it, otherwise false.
+- Also return the matched ingredients for each category.
+- An ingredient may appear in more than one category only if strongly justified, but avoid over-tagging.
+- Use general food knowledge for common ingredients and food terms.
+- "Plant materials" includes fruits, vegetables, herbs, legumes, spices, sugar, cocoa, mushrooms, plant oils.
+- "Seeds / grains / nuts" includes wheat, flour, oats, rice, corn, barley, quinoa, sesame, almonds, peanuts, cashews, walnuts, etc.
+- "Processed packaged foods" includes clearly packaged/industrial items like instant noodles, chips, biscuits, cereal bars, seasoning sachets, canned soup, processed snacks.
+- "Mixed foods" should be true only when an ingredient itself is a combined food item, such as curry paste, dumpling filling, sausage roll, burger patty with fillers, chocolate sandwich cookie, mayonnaise-based dressing, or another prepared composite food.
+- If no ingredient belongs to a category, return false and an empty list for that category.
+- Return valid JSON only.
+
+Ingredients:
+{json.dumps(ingredients_raw, ensure_ascii=False)}
+"""
+
+    response = gemini_client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config={
+            "response_mime_type": "application/json",
+            "response_json_schema": schema,
+        },
+    )
+
+    return json.loads(response.text)
+
+
 def allowed_file_mime(mime_type: str):
     return mime_type in {"image/jpeg", "image/png", "image/webp"}
 
@@ -232,16 +344,32 @@ def analyze():
             # if OFF found product, use OFF result
             if off_data.get("product"):
                 result = build_off_response(barcode, off_data)
+                classification = classify_ingredients_to_categories(
+                    result.get("ingredients_raw", [])
+                )
+                result.update(classification)
                 return jsonify(result)
 
             # if barcode exists but OFF has no product, fall back to Gemini
             gemini_result = analyze_with_gemini(image_bytes, mime_type)
             gemini_result["barcode"] = barcode
             gemini_result["source"] = "gemini_fallback_after_barcode"
+
+            classification = classify_ingredients_to_categories(
+                gemini_result.get("ingredients_raw", [])
+            )
+            gemini_result.update(classification)
+
             return jsonify(gemini_result)
 
         # 2) No barcode found -> Gemini
         result = analyze_with_gemini(image_bytes, mime_type)
+
+        classification = classify_ingredients_to_categories(
+            result.get("ingredients_raw", [])
+        )
+        result.update(classification)
+
         return jsonify(result)
 
     except Exception as e:
