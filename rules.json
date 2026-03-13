@@ -48,7 +48,7 @@
         "origin_country": [],
         "verdict": "not_allowed",
         "reason": "Raw (uncooked) rice is not permitted and will be destroyed."
-    }
+    },
     {
         "id": "rice_product",
         "priority": 6,
@@ -69,5 +69,66 @@
         "origin_country": [],
         "verdict": "declare",
         "reason": "Other processed rice products (including roasted, parboiled or puffed rice, microwave ready rice pouches, rice flakes and rice flour) must meet import conditions."
+    },
+    {
+        "id": "chocolate_confectionery",
+        "priority": 2,
+        "condition": {
+            "is_commercially": true,
+            "contain_meat": false
+        },
+        "restriction": {
+            "consumption": "for personal import"
+        },
+        "origin_country": [],
+        "verdict": "likely_allowed",
+        "reason": "Commercially prepared and packaged chocolate or confectionery (including fudge, toffees, boiled sweets, peppermints, marshmallows, and liquorice) are allowed if they do not contain meat."
+    },
+    {
+        "id": "biscuits_cakes_pastries",
+        "priority": 1,
+        "condition": {
+            "is_shelf_stable": true,
+            "contain_meat": false,
+            "processing_state": ["fully_cooked"]
+        },
+        "restriction": {
+            "consumption": "for personal consumption",
+            "fillings_toppings": "must be cooked with the cake"
+        },
+        "origin_country": [],
+        "verdict": "likely_allowed",
+        "reason": "Biscuits, bread, cakes, pastries, Christmas cake, and Christmas pudding are allowed if fully cooked, shelf stable, meat-free, and fillings/toppings are cooked with the cake."
+    },
+    {
+        "id": "vegetable_seed_oil",
+        "priority": 3,
+        "condition": {
+            "type": ["peanut", "safflower", "linseed", "olive", "cottonseed"],
+            "is_clean": true,
+            "free_of_contaminants": true
+        },
+        "restriction": {},
+        "origin_country": [],
+        "verdict": "likely_allowed",
+        "reason": "Vegetable and seed oils are allowed if clean and free of contaminant seed, soil, and animal or plant debris."
+    },
+    {
+        "id": "maple_syrup",
+        "priority": 4,
+        "condition": {},
+        "restriction": {},
+        "origin_country": [],
+        "verdict": "likely_allowed",
+        "reason": "Maple syrup is allowed into Australia."
+    },
+    {
+        "id": "food_plane_ship",
+        "priority": 9,
+        "condition": {},
+        "restriction": {},
+        "origin_country": [],
+        "verdict": "not_allowed",
+        "reason": "Food from the plane or ship is not permitted to be brought into Australia."
     }
 ]
