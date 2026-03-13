@@ -1,0 +1,73 @@
+[
+    {
+        "id":"pastries",
+        "priority": 1, 
+        "condition": 
+        {
+            "is_shelf_stable": true,
+            "contain_meat": false,
+            "processing_state": ["fully_cooked"]
+        },
+        "restriction": 
+        {
+            "consumption": "for personal consumption"
+        },
+        "origin_country": [],
+        "verdict": "likely_allowed",
+        "reason": "Biscuits, bread, cakes, pastries, Christmas cake, and Christmas pudding are generally allowed if restrictions are met."
+    },
+    {
+        "id": "dairy",
+        "priority": 5,
+        "condition": 
+        {
+            "contain_dairy": true,
+            "is_commercial": true
+        },
+        "restriction": 
+        {
+            "limitation": "10 kilograms or 10 litres",
+            "comsumption": "for human consumption"
+        },
+        "origin_country": 
+        [
+            "Australia", "Austria", "Belgium", "Bosnia and Herzegovina", "Canada", "Chile", "Croatia", "Czechia (Czech Republic)", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Iceland", "Ireland, Republic of", "Italy", "Japan", "Latvia", "Lithuania", "Luxembourg", "Malta", "Mexico", "Montenegro", "Netherlands", "New Caledonia", "New Zealand", "North Macedonia, Republic of", "Norway", "Poland", "Portugal", "Romania", "San Marino", "Serbia", "Singapore", "Slovenia", "Spain", "Sweden", "Switzerland", "United Kingdom", "United States of America", "Vanuatu"
+        ],
+        "verdict": "declare",
+        "reason": "Cheese, butter, and other dairy products are permitted. But these products must be declared and inspected on arrival. Products that do not meet import conditions will be exported or destroyed at the importer's expense."
+    },
+    {
+        "id": "rice",
+        "priority": 10,
+        "condition": 
+        {
+            "contain_rice": true,
+            "is_processed": false
+        },
+        "restriction": {},
+        "origin_country": [],
+        "verdict": "not_allowed",
+        "reason": "Raw (uncooked) rice is not permitted and will be destroyed."
+    }
+    {
+        "id": "rice_product",
+        "priority": 6,
+        "condition": 
+        {
+            "contain_rice": true,
+            "is_processed": true,
+            "processing_state": 
+            [
+                "roasted",
+                "parboiled",
+                "puffed",
+                "microwave_ready",
+                "flaked",
+                "flour"
+            ]
+        },
+        "origin_country": [],
+        "verdict": "declare",
+        "reason": "Other processed rice products (including roasted, parboiled or puffed rice, microwave ready rice pouches, rice flakes and rice flour) must meet import conditions."
+    }
+]
