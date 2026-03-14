@@ -1,82 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Food Scanner</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 0 20px;
-      line-height: 1.5;
-    }
-
-    .card {
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 20px;
-    }
-
-    button {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    pre {
-      background: #f5f5f5;
-      padding: 16px;
-      border-radius: 10px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-
-    img {
-      max-width: 300px;
-      margin-top: 15px;
-      border-radius: 10px;
-      display: none;
-    }
-
-    .loading {
-      color: #666;
-      margin-top: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phobidden Import</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-  <h1>Food Ingredient Extractor</h1>
-  <p>Upload a normal food image or a barcode image.</p>
-  <p>If a barcode is detected, the backend uses Open Food Facts. Otherwise it uses Gemini.</p>
 
-  <div class="card">
-    <h3>Upload Image</h3>
-    <input type="file" id="imageInput" accept="image/*" />
-    <br><br>
-    <button id="uploadBtn">Analyze Image</button>
+    <header class="header">
+        <div class="container header-content">
+            <svg class="shield-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <div>
+                <h1>Phobidden Import</h1>
+                <p class="subtitle">Check if your items can be brought into Australia</p>
+            </div>
+        </div>
+    </header>
 
-    <div class="loading" id="loading"></div>
-    <img id="preview" alt="Preview" />
-  </div>
+    <nav class="navigation-bar">
+        <div class="nav-bar-section">
+            <a href="/" class="nav-box active">Home</a>
+            <a href="/user-reports" class="nav-box">Attribute to our data</a>
+            <a href="/about-us" class="nav-box">About us</a>
+        </div>
+    </nav>
 
-  <div class="card">
-    <h3>Product Description</h3>
-    <textarea 
-      id="textInput" ></textarea>
-    <br><br>
-    <button id="textBtn">Analyze Text</button>
-  </div>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Powered by AI + Official BICON Data
+        </div>
+        <h2>Know before you <em>fly</em></h2>
+        <p class="hero-sub">Check any food, plant or item against Australia's biosecurity rules — including complex multi-ingredient products BICON can't handle.</p>
+        <div class="hero-pills">
+            <span class="pill">Foods &amp; snacks</span>
+            <span class="pill">Plants &amp; seeds</span>
+            <span class="pill">Animal products</span>
+            <span class="pill">Medicines</span>
+            <span class="pill">Wooden items</span>
+        </div>
+    </section>
 
-  <div class="card">
-    <h3>JSON Result</h3>
-    <pre id="result">No result yet.</pre>
-  </div>
+    <!-- Checker card -->
+    <div class="card-lift" id="inputSection">
+        <div class="card">
+            <div class="card-header">
+                <h3>What are you bringing to Australia?</h3>
+                <p>Describe it or upload a photo.</p>
+            </div>
 
-  <script src="/static/app.js"></script>
+            <div class="mode-tabs">
+                <button id="textModeBtn" class="mode-btn active">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                        <line x1="9" y1="20" x2="15" y2="20"></line>
+                        <line x1="12" y1="4" x2="12" y2="20"></line>
+                    </svg>
+                    Describe item
+                </button>
+                <button id="imageModeBtn" class="mode-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    Upload Photo/Barcode of product
+                </button>
+            </div>
+
+            <div class="card-body">
+
+                <!-- Text input -->
+                <div id="textInputContainer">
+                    <textarea
+                        id="textInput"
+                        placeholder="e.g., Bánh tráng trộn (Vietnamese rice paper with chili oil, fried shallots, and garlic)"
+                        rows="5"
+                    ></textarea>
+                </div>
+
+                <!-- Image input -->
+                <div id="imageInputContainer" style="display:none">
+                    <label for="imageInput" class="upload-area" id="imageUploadArea">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span>Click to upload or drag and drop</span>
+                        <small>JPG, PNG, WEBP up to 10MB</small>
+                        <img id="imagePreview" alt="Preview">
+                    </label>
+                    <input type="file" id="imageInput" accept="image/*" style="display:none">
+                </div>
+
+                <button id="checkBtn" class="btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    Check Item
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result section -->
+    <div id="resultSection">
+        <div id="resultCard"></div>
+        <button id="checkAnotherBtn" class="btn-secondary">← Check Another Item</button>
+    </div>
+
+    <!-- Info cards -->
+    <div class="info-strip">
+        <div class="info-card info-card-blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <div>
+                <h4>Why use this tool?</h4>
+                <ul>
+                    <li>BICON only covers simple items — we handle complex multi-ingredient foods</li>
+                    <li>Community reports add real-world context</li>
+                    <li>Save time before you travel</li>
+                </ul>
+            </div>
+        </div>
+        <div class="info-card info-card-amber">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <div>
+                <h4>When in doubt, declare</h4>
+                <p>This tool provides guidance only. Final decisions always rest with biosecurity officers at the border.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature highlights -->
+    <div class="features-row">
+        <div class="feature-item">
+            <div class="feature-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </div>
+            <h4>AI-Powered Analysis</h4>
+            <p>Understands complex, multi-ingredient foods that standard tools miss.</p>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+            <h4>Community Reports</h4>
+            <p>Real traveller experiences add context beyond official rules.</p>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+            </div>
+            <h4>Upload Photo/Barcode of product</h4>
+            <p>Upload an image and we’ll extract ingredients for biosecurity checks.</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>This tool provides guidance only. Always check official sources and declare items when in doubt.</p>
+        <p>From Phobidden Import Team with Love &lt;3 &nbsp;·&nbsp; <a href="/about-us">About us</a></p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
 </body>
 </html>
