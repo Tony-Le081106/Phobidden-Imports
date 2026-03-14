@@ -55,11 +55,21 @@
   <p>If a barcode is detected, the backend uses Open Food Facts. Otherwise it uses Gemini.</p>
 
   <div class="card">
+    <h3>Upload Image</h3>
     <input type="file" id="imageInput" accept="image/*" />
     <br><br>
-    <button id="uploadBtn">Analyze</button>
+    <button id="uploadBtn">Analyze Image</button>
+
     <div class="loading" id="loading"></div>
     <img id="preview" alt="Preview" />
+  </div>
+
+  <div class="card">
+    <h3>Product Description</h3>
+    <textarea 
+      id="textInput" ></textarea>
+    <br><br>
+    <button id="textBtn">Analyze Text</button>
   </div>
 
   <div class="card">

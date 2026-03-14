@@ -12,8 +12,9 @@ from function.ingredient_extraction import (
     detect_barcode,
     get_product_by_barcode,
     parse_ingredients_from_off,
-    build_off_response,
-    analyze_with_gemini
+    build_off_base,
+    extract_from_image,
+    extract_from_text
 )
 
 load_dotenv()
@@ -29,13 +30,80 @@ gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 def allowed_file_mime(mime_type: str):
     return mime_type in {"image/jpeg", "image/png", "image/webp"}
 
+def apply_classification_and_rules(base_data):
+    classification = classify_ingredients_to_categories(
+        base_data.get("ingredients_raw", [])
+    )
+    base_data.update(classification)
+
+    biosecurity_result = compare_rules(base_data)
+    base_data["biosecurity_result"] = biosecurity_result
+
+    return base_data
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
+@app.route("/check-text", methods=["POST"])
+def check_text():
+    # check product description
+
+    body = request.get_json(silent=True) or {}
+    text = (body.get("text") or "").strip()
+
+    if not text:
+        return jsonify({"error": "No text provided"}), 400
+
+    try:
+        base_data = extract_from_text(text)
+        result = apply_classification_and_rules(base_data)
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/check-barcode", methods=["POST"])
+def check_barcode():
+
+    body = request.get_json(silent=True) or {}
+    barcode = (body.get("barcode") or "").strip()
+
+    if not barcode:
+        return jsonify({"error": "No barcode provided"}), 400
+
+    try:
+        off_data = get_product_by_barcode(barcode)
+
+        # open food facts
+        if off_data.get("product"):
+            base_data = build_off_base(barcode, off_data)
+
+        # barcode not found
+        else:
+            base_data = {
+                "product_name": None,
+                "barcode": barcode,
+                "input_type": ["barcode"],
+                "is_commercial_packaged": True,
+                "is_homemade": False,
+                "packaging_state": "unknown",
+                "ingredients_raw": [],
+                "source": "barcode_not_found",
+            }
+
+        result = apply_classification_and_rules(base_data)
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
+
     if "image" not in request.files:
         return jsonify({"error": "No image uploaded"}), 400
 
@@ -51,50 +119,30 @@ def analyze():
     image_bytes = file.read()
 
     try:
-        # 1) Try barcode route first
         barcode = detect_barcode(image_bytes)
 
         if barcode:
             off_data = get_product_by_barcode(barcode)
 
-            # if OFF found product, use OFF result
+            # open food facts 
             if off_data.get("product"):
-                result = build_off_response(barcode, off_data)
-                classification = classify_ingredients_to_categories(
-                    result.get("ingredients_raw", [])
-                )
-                result.update(classification)
-                return jsonify(result)
+                result = build_off_base(barcode, off_data)
+                return jsonify(apply_classification_and_rules(result))
 
-            # if barcode exists but OFF has no product, fall back to Gemini
-            gemini_result = analyze_with_gemini(image_bytes, mime_type)
+            # gemini fallback when data not found
+            gemini_result = extract_from_image(image_bytes, mime_type)
             gemini_result["barcode"] = barcode
             gemini_result["source"] = "gemini_fallback_after_barcode"
 
-            classification = classify_ingredients_to_categories(
-                gemini_result.get("ingredients_raw", [])
-            )
-            gemini_result.update(classification)
-            biosecurity_result = compare_rules(gemini_result)
-            gemini_result["biosecurity_result"] = biosecurity_result
+            return jsonify(apply_classification_and_rules(gemini_result))
 
-            return jsonify(gemini_result)
+        # no barcode gemini
+        result = extract_from_image(image_bytes, mime_type)
 
-        # 2) No barcode found -> Gemini
-        result = analyze_with_gemini(image_bytes, mime_type)
-
-        classification = classify_ingredients_to_categories(
-            result.get("ingredients_raw", [])
-        )
-        result.update(classification)
-        biosecurity_result = compare_rules(result)
-        result["biosecurity_result"] = biosecurity_result
-
-        return jsonify(result)
+        return jsonify(apply_classification_and_rules(result))
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
+    
 if __name__ == "__main__":
     app.run(debug=True)

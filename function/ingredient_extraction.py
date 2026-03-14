@@ -23,171 +23,144 @@ if not GEMINI_API_KEY:
 gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
 
-# ----------------------------
-# Helpers
-# ----------------------------
-
 def detect_barcode(image_bytes: bytes):
-    """
-    Try to decode barcode from uploaded image.
-    Returns barcode string if found, else None.
-    """
+    # Use pyzbar to detect barcodes in the image
     image = Image.open(io.BytesIO(image_bytes))
     decoded_objects = decode(image)
-
     if not decoded_objects:
         return None
-
-    # just take the first barcode found
     return decoded_objects[0].data.decode("utf-8")
 
 
 def get_product_by_barcode(barcode: str):
-    """
-    Query Open Food Facts using barcode.
-    OFF API v2 barcode endpoint:
-    https://world.openfoodfacts.net/api/v2/product/{barcode}
-    """
+    # Query Open Food Facts API for product information based on the barcode
     url = f"https://world.openfoodfacts.net/api/v2/product/{barcode}"
     res = requests.get(url, timeout=15)
-
     if not res.ok:
         raise Exception("Open Food Facts lookup failed")
-
     return res.json()
 
 
 def parse_ingredients_from_off(product_data: dict):
-    """
-    Extract ingredients_raw from Open Food Facts product data.
-    Prefer ingredients_text if present.
-    """
+    # Extract ingredients from Open Food Facts product data
     product = product_data.get("product", {})
-
-    ingredients_raw = []
-
-    # 1) best easy source
     ingredients_text = product.get("ingredients_text")
     if ingredients_text:
         parts = re.split(r",|;|\.", ingredients_text)
-        ingredients_raw = [p.strip() for p in parts if p.strip()]
-        return ingredients_raw
-
-    # 2) fallback: structured ingredients
-    structured_ingredients = product.get("ingredients", [])
-    for item in structured_ingredients:
-        text = item.get("text")
-        if text:
-            ingredients_raw.append(text.strip())
-
-    return ingredients_raw
+        return [p.strip() for p in parts if p.strip()]
+    structured = product.get("ingredients", [])
+    return [item.get("text", "").strip() for item in structured if item.get("text")]
 
 
-def build_off_response(barcode: str, off_data: dict):
-    """
-    Convert OFF response into your app JSON shape.
-    """
+def build_off_base(barcode: str, off_data: dict) -> dict:
+    # Build base data structure from Open Food Facts response
     product = off_data.get("product", {})
-    ingredients_raw = parse_ingredients_from_off(off_data)
-
     return {
-        "product_name": product.get("product_name"),
-        "barcode": barcode,
-        "input_type": ["image", "barcode"],
+        "product_name":           product.get("product_name"),
+        "barcode":                barcode,
+        "input_type":             ["barcode"],
         "is_commercial_packaged": True,
-        "is_homemade": False,
-        "packaging_state": "unknown",
-        "ingredients_raw": ingredients_raw,
-        "source": "open_food_facts"
+        "is_homemade":            False,
+        "packaging_state":        "sealed",
+        "ingredients_raw":        parse_ingredients_from_off(off_data),
+        "source":                 "open_food_facts",
     }
 
 
-def analyze_with_gemini(image_bytes: bytes, mime_type: str):
-    """
-    Send image to Gemini and ask for JSON only.
-    """
+def extract_from_image(image_bytes: bytes, mime_type: str) -> dict:
+    # Extract product information from an image using Gemini
     schema = {
         "type": "object",
         "properties": {
-            "product_name": {
-                "type": ["string", "null"],
-                "description": "Product name if identifiable."
-            },
-            "barcode": {
-                "type": ["string", "null"],
-                "description": "Barcode if visible, else null."
-            },
-            "input_type": {
-                "type": "array",
-                "items": {"type": "string"}
-            },
-            "is_commercial_packaged": {
-                "type": "boolean"
-            },
-            "is_homemade": {
-                "type": "boolean"
-            },
-            "packaging_state": {
-                "type": "string",
-                "description": "One of sealed, open, unknown."
-            },
-            "ingredients_raw": {
-                "type": "array",
-                "items": {"type": "string"},
-                "description": "Raw visible or strongly inferred ingredients."
-            }
+            "product_name":           {"type": ["string", "null"]},
+            "barcode":                {"type": ["string", "null"]},
+            "input_type":             {"type": "array", "items": {"type": "string"}},
+            "is_commercial_packaged": {"type": "boolean"},
+            "is_homemade":            {"type": "boolean"},
+            "packaging_state":        {"type": "string"},
+            "ingredients_raw":        {"type": "array", "items": {"type": "string"}},
         },
         "required": [
-            "product_name",
-            "barcode",
-            "input_type",
-            "is_commercial_packaged",
-            "is_homemade",
-            "packaging_state",
-            "ingredients_raw"
-        ]
+            "product_name", "barcode", "input_type",
+            "is_commercial_packaged", "is_homemade",
+            "packaging_state", "ingredients_raw",
+        ],
     }
 
     prompt = """
-You are a food image extraction assistant.
-
-Look at the uploaded food image and return JSON only.
+You are a food product extraction assistant.
+Look at the uploaded image and extract product facts only. Do NOT assess biosecurity.
 
 Rules:
-- Do NOT make biosecurity decisions.
-- Extract only product facts.
-- If you are unsure, still return valid JSON.
-- ingredients_raw should contain visible or strongly supported ingredients only.
-- If you cannot identify ingredients, return an empty array.
-- packaging_state must be one of: sealed, open, unknown.
-- barcode should be null if not visible.
-- input_type should be ["image"].
-
-Output fields:
-- product_name
-- barcode
-- input_type
-- is_commercial_packaged
-- is_homemade
-- packaging_state
-- ingredients_raw
+- packaging_state: sealed / open / unknown
+- barcode: null if not clearly visible
+- input_type: ["image"]
+- ingredients_raw: only what is clearly visible or strongly implied; empty array if unsure
 """
 
     response = gemini_client.models.generate_content(
         model="gemini-2.5-flash",
         contents=[
-            types.Part.from_bytes(
-                data=image_bytes,
-                mime_type=mime_type
-            ),
-            prompt
+            types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
+            prompt,
         ],
         config={
             "response_mime_type": "application/json",
             "response_json_schema": schema,
-        }
+        },
     )
 
     data = json.loads(response.text)
-    data["source"] = "gemini"
+    data["source"] = "gemini_image"
+    return data
+
+
+def extract_from_text(text: str) -> dict:
+    # Extract product information from text input using Gemini
+    schema = {
+        "type": "object",
+        "properties": {
+            "product_name":           {"type": ["string", "null"]},
+            "is_commercial_packaged": {"type": "boolean"},
+            "is_homemade":            {"type": "boolean"},
+            "ingredients_raw": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+        },
+        "required": [
+            "product_name", "is_commercial_packaged",
+            "is_homemade", "ingredients_raw",
+        ],
+    }
+
+    prompt = f"""
+You are a food ingredient extraction assistant for Australian border biosecurity.
+
+The user is describing an item they want to bring into Australia.
+Extract every ingredient or food component — explicitly stated AND strongly implied.
+
+For named dishes (e.g. "bánh mì", "pho", "sushi"), include typical ingredients.
+For packaged products (e.g. "Indomie noodles"), include known ingredients.
+Be thorough. Do not invent ingredients not implied by the input.
+
+User input: "{text}"
+
+Return valid JSON only.
+"""
+
+    response = gemini_client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config={
+            "response_mime_type": "application/json",
+            "response_json_schema": schema,
+        },
+    )
+
+    data = json.loads(response.text)
+    data["source"]          = "text_input"
+    data["input_type"]      = ["text"]
+    data["barcode"]         = None
+    data["packaging_state"] = "unknown"
     return data
