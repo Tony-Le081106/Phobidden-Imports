@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Reports – Australian Biosecurity Checker</title>
+    <link rel="stylesheet" href="user-reports-style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="container header-content">
+            <svg class="shield-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <div>
+                <h1>Australian Biosecurity Checker</h1>
+                <p class="subtitle">Check if your items can be brought into Australia</p>
+            </div>
+        </div>
+    </header>
+
+    <nav class="navigation-bar">
+        <div class="nav-bar-section">
+            <a href="biosecurity-checker.html" class="nav-box">Home</a>
+            <a href="user-reports.html" class="nav-box active">Contribute to our data</a>
+            <a href="about-us.html" class="nav-box">About us</a>
+        </div>
+    </nav>
+
+    <!-- Page hero -->
+    <section class="page-hero">
+        <div class="container">
+            <div class="hero-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Community-Powered
+            </div>
+            <h2>Help us get it <em>right</em></h2>
+            <p class="hero-sub">Our data isn't perfect. If our checker gave you wrong advice - or if you want to share what actually happened at the border - your report helps every future traveller.</p>
+        </div>
+    </section>
+
+    <!-- Main layout -->
+    <div class="page-body container">
+
+        <!-- LEFT: Submit a report -->
+        <div class="report-form-col">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Submit a report</h3>
+                    <p>Took 2 minutes to fill in - saves someone else a customs headache.</p>
+                </div>
+                <div class="card-body">
+
+                    <!-- Step 1: Item -->
+                    <div class="form-section">
+                        <div class="step-label">
+                            <span class="step-num">1</span>
+                            What item are you reporting?
+                        </div>
+                        <input type="text" id="itemName" placeholder="e.g., Bánh tráng trộn, dried mango, honey candy..." class="text-input">
+                        <div class="char-count"><span id="charCount">0</span> / 120</div>
+                    </div>
+
+                    <!-- Step 2: What we said -->
+                    <div class="form-section">
+                        <div class="step-label">
+                            <span class="step-num">2</span>
+                            What did our checker say?
+                        </div>
+                        <div class="radio-group" id="checkerSaidGroup">
+                            <label class="radio-card green">
+                                <input type="radio" name="checkerSaid" value="allowed">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                Allowed
+                            </label>
+                            <label class="radio-card amber">
+                                <input type="radio" name="checkerSaid" value="declare">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                Must Declare
+                            </label>
+                            <label class="radio-card red">
+                                <input type="radio" name="checkerSaid" value="prohibited">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                Prohibited
+                            </label>
+                            <label class="radio-card muted">
+                                <input type="radio" name="checkerSaid" value="didnt_check">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                Didn't check
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: What actually happened -->
+                    <div class="form-section">
+                        <div class="step-label">
+                            <span class="step-num">3</span>
+                            What actually happened at the border?
+                        </div>
+                        <div class="radio-group" id="actualOutcomeGroup">
+                            <label class="radio-card green">
+                                <input type="radio" name="actualOutcome" value="allowed">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                Let through
+                            </label>
+                            <label class="radio-card amber">
+                                <input type="radio" name="actualOutcome" value="declared">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                Declared &amp; passed
+                            </label>
+                            <label class="radio-card red">
+                                <input type="radio" name="actualOutcome" value="confiscated">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                Confiscated
+                            </label>
+                            <label class="radio-card muted">
+                                <input type="radio" name="actualOutcome" value="not_travelled">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                Haven't travelled yet
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Was our result correct? -->
+                    <div class="form-section" id="accuracySection">
+                        <div class="step-label">
+                            <span class="step-num">4</span>
+                            Was our checker's result accurate?
+                        </div>
+                        <div class="accuracy-toggle" id="accuracyToggle">
+                            <button class="toggle-btn" data-value="yes" onclick="setAccuracy('yes')">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Yes, it was correct
+                            </button>
+                            <button class="toggle-btn" data-value="no" onclick="setAccuracy('no')">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                No, it was wrong
+                            </button>
+                            <button class="toggle-btn" data-value="unsure" onclick="setAccuracy('unsure')">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                Not sure
+                            </button>
+                        </div>
+                        <input type="hidden" id="accuracyValue" value="">
+                    </div>
+
+                    <!-- Step 5: Details -->
+                    <div class="form-section">
+                        <div class="step-label">
+                            <span class="step-num">5</span>
+                            Any extra details? <span class="optional-tag">optional</span>
+                        </div>
+                        <textarea id="details" placeholder="e.g., The officer said it was fine because it was commercially sealed. The packaging was in Vietnamese with no English label..." rows="4"></textarea>
+                        <div class="form-hint">Your details help others in the same situation. No personal info needed.</div>
+                    </div>
+
+                    <!-- Origin country -->
+                    <div class="form-section">
+                        <div class="step-label">
+                            <span class="step-num">6</span>
+                            Where were you travelling from? <span class="optional-tag">optional</span>
+                        </div>
+                        <select id="originCountry" class="select-input" title="country-option">
+                            <option value="">— Select country —</option>
+                            <option>Vietnam</option>
+                            <option>China</option>
+                            <option>Japan</option>
+                            <option>South Korea</option>
+                            <option>Thailand</option>
+                            <option>Indonesia</option>
+                            <option>Philippines</option>
+                            <option>India</option>
+                            <option>United Kingdom</option>
+                            <option>United States</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-primary" id="submitBtn" onclick="submitReport()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                        Submit Report
+                    </button>
+
+                    <!-- Success state -->
+                    <div id="successMsg" class="success-msg" style="display:none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <div>
+                            <strong>Report submitted — thank you!</strong>
+                            <p>Your experience will help improve results for future travellers.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Recent community reports feed -->
+        <div class="reports-feed-col">
+
+            <!-- Stats bar -->
+            <div class="stats-bar">
+                <div class="stat-chip">
+                    <span class="stat-n" id="totalCount">247</span>
+                    <span class="stat-l">total reports</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-n green" id="accurateCount">81%</span>
+                    <span class="stat-l">checker accuracy</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-n amber" id="recentCount">12</span>
+                    <span class="stat-l">this week</span>
+                </div>
+            </div>
+
+            <div class="feed-header">
+                <h3>Recent reports</h3>
+                <div class="filter-row">
+                    <button class="filter-btn active" data-filter="all" onclick="filterReports('all', this)">All</button>
+                    <button class="filter-btn" data-filter="wrong" onclick="filterReports('wrong', this)">Checker was wrong</button>
+                    <button class="filter-btn" data-filter="confiscated" onclick="filterReports('confiscated', this)">Confiscated</button>
+                </div>
+            </div>
+
+            <div id="reportsFeed" class="reports-feed">
+                <!-- Populated by JS -->
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>This tool provides guidance only. Always check official sources and declare items when in doubt.</p>
+        <p>From Phobidden Import Team with Love &lt;3 &nbsp;·&nbsp; <a href="about-us.html">About us</a></p>
+    </footer>
+
+    <script src="user-reports.js"></script>
+
+</body>
+</html>
