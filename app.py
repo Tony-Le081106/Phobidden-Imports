@@ -12,7 +12,7 @@ import requests
 from google import genai
 from google.genai import types
 
-from compare import compare_rules
+from function.compare import compare_rules
 
 load_dotenv()
 
