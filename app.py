@@ -12,6 +12,8 @@ import requests
 from google import genai
 from google.genai import types
 
+from compare import compare_rules
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -359,6 +361,8 @@ def analyze():
                 gemini_result.get("ingredients_raw", [])
             )
             gemini_result.update(classification)
+            biosecurity_result = compare_rules(gemini_result)
+            gemini_result["biosecurity_result"] = biosecurity_result
 
             return jsonify(gemini_result)
 
@@ -369,6 +373,8 @@ def analyze():
             result.get("ingredients_raw", [])
         )
         result.update(classification)
+        biosecurity_result = compare_rules(result)
+        result["biosecurity_result"] = biosecurity_result
 
         return jsonify(result)
 
