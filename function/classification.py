@@ -13,165 +13,156 @@ if not GEMINI_API_KEY:
 
 gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
-def classify_ingredients_to_categories(ingredients_raw: list[str]):
-    """
-    Classify ingredients into 7 predefined categories.
-    Returns booleans + matched ingredients per category.
-    """
+# load rule
+RULES_PATH = os.path.join(os.path.dirname(__file__), "..", "reference.json")
+
+with open(RULES_PATH, encoding="utf-8") as _f:
+    _RULES = json.load(_f)
+
+RULES_MAP  = {rule["item"]: rule for rule in _RULES}
+RULE_KEYS  = list(RULES_MAP.keys())
+
+def classify_for_rules(base_data: dict) -> dict:
+    # classify to match rule
+    ingredients_raw = base_data.get("ingredients_raw", [])
+    product_name    = base_data.get("product_name") or "Unknown"
+    is_commercial   = base_data.get("is_commercial_packaged", False)
+    packaging_state = base_data.get("packaging_state", "unknown")
+    is_homemade     = base_data.get("is_homemade", False)
+
+
+    categories_props = {k: {"type": "boolean"} for k in RULE_KEYS}
+    matches_props    = {k: {"type": "array", "items": {"type": "string"}} for k in RULE_KEYS}
+
     schema = {
         "type": "object",
         "properties": {
             "categories": {
                 "type": "object",
-                "properties": {
-                    "rice": {"type": "boolean"},
-                    "spices": {"type": "boolean"},
-                    "nuts": {"type": "boolean"},
-                    "sauces": {"type": "boolean"},
-                    "seafood_shellfish_snails": {"type": "boolean"},
-                    "meat_products": {"type": "boolean"},
-                    "dairy_egg_products": {"type": "boolean"},
-                    "Plant materials": {"type": "boolean"},
-                    "Seeds / grains / nuts": {"type": "boolean"},
-                    "Processed packaged foods": {"type": "boolean"},
-                    "Mixed foods": {"type": "boolean"},
-                },
-                "required": [
-                    "rice",
-                    "spices",
-                    "nuts",
-                    "sauces",
-                    "seafood_shellfish_snails",
-                    "meat_products",
-                    "dairy_egg_products",
-                    "Plant materials",
-                    "Seeds / grains / nuts",
-                    "Processed packaged foods",
-                    "Mixed foods",
-                ],
+                "properties": categories_props,
+                "required": RULE_KEYS,
                 "additionalProperties": False,
             },
             "category_matches": {
                 "type": "object",
-                "properties": {
-                    "rice": {"type": "array", "items": {"type": "string"}},
-                    "spices": {"type": "array", "items": {"type": "string"}},
-                    "nuts": {"type": "array", "items": {"type": "string"}},
-                    "sauces": {"type": "array", "items": {"type": "string"}},
-                    "seafood_shellfish_snails": {"type": "array", "items": {"type": "string"}},
-                    "meat_products": {"type": "array", "items": {"type": "string"}},
-                    "dairy_egg_products": {"type": "array", "items": {"type": "string"}},
-                    "Plant materials": {"type": "array", "items": {"type": "string"}},
-                    "Seeds / grains / nuts": {"type": "array", "items": {"type": "string"}},
-                    "Processed packaged foods": {"type": "array", "items": {"type": "string"}},
-                    "Mixed foods": {"type": "array", "items": {"type": "string"}},
-                },
-                "required": [
-                    "rice",
-                    "spices",
-                    "nuts",
-                    "sauces",
-                    "seafood_shellfish_snails",
-                    "meat_products",
-                    "dairy_egg_products",
-                    "Plant materials",
-                    "Seeds / grains / nuts",
-                    "Processed packaged foods",
-                    "Mixed foods",
-                ],
+                "properties": matches_props,
+                "required": RULE_KEYS,
                 "additionalProperties": False,
             },
             "attributes": {
                 "type": "object",
                 "properties": {
-                    "processed": {"type": "boolean"},
-                    "dried": {"type": "boolean"},
-                    "plant_based": {"type": "boolean"},
-                    "shelf_stable": {"type": "boolean"},
-                    "canned": {"type": "boolean"},
-                    "retorted": {"type": "boolean"}
+                    "commercial_packaging":   {"type": "boolean"},
+                    "shelf_stable":           {"type": "boolean"},
+                    "fully_cooked":           {"type": "boolean"},
+                    "contains_meat":          {"type": "boolean"},
+                    "personal_use":           {"type": "boolean"},
+                    "plant_based":            {"type": "boolean"},
+                    "plant_origin_only":      {"type": "boolean"},
+                    "processed":              {"type": "boolean"},
+                    "dried":                  {"type": "boolean"},
+                    "canned":                 {"type": "boolean"},
+                    "retorted":               {"type": "boolean"},
+                    "roasted":                {"type": "boolean"},
+                    "instant_use":            {"type": "boolean"},
+                    "clean_packaging":        {"type": "boolean"},
+                    "human_consumption":      {"type": "boolean"},
+                    "commercially_milled":    {"type": "boolean"},
+                    "botanical_label":        {"type": "boolean"},
+                    "fmd_free_country":       {"type": "boolean"},
+                    "certificate_required":   {"type": "boolean"},
+                    "import_permit_required": {"type": "boolean"},
+                    "personal_use_infant":    {"type": "boolean"},
                 },
-                "required": [
-                    "processed",
-                    "dried",
-                    "plant_based",
-                    "shelf_stable",
-                    "canned",
-                    "retorted"
-                ],
-                "additionalProperties": False
+                "additionalProperties": False,
             },
-            "category_reason": {
-                "type": "string"
-            }
         },
-        "required": ["categories", "category_matches", "attributes", "category_reason"],
-        "additionalProperties": False
+        "required": ["categories", "category_matches", "attributes"],
+        "additionalProperties": False,
     }
 
     prompt = f"""
-You are a food ingredient categorization assistant.
+You are an Australian biosecurity ingredient classifier.
 
-Your task is to analyze a list of food ingredients and determine:
-1. Which biosecurity rule categories the ingredients belong to.
-2. Which food attributes apply to the product so that biosecurity rules can be evaluated
+Product: "{product_name}"
+Commercially packaged: {is_commercial}
+Packaging state: {packaging_state}
+Homemade: {is_homemade}
+Ingredients: {json.dumps(ingredients_raw, ensure_ascii=False)}
 
-11 categories are:
-1. rice
-2. spices
-3. nuts
-4. sauces
-5. seafood_shellfish_snails
-6. meat_products
-7. dairy_egg_products
-8. Plant materials
-9. Seeds / grains / nuts
-10. Processed packaged foods
-11. Mixed foods
+PART 1 — categories + category_matches
 
-Definitions:
-- rice: ingredients made from rice or containing rice such as rice, rice flour, rice paper, rice noodles, rice crackers, rice cakes
-- spices: dried or powdered plant ingredients used to season food such as chili, pepper, paprika, turmeric, garlic powder, onion powder, dried herbs, seasoning powder.
-- nuts: edible nuts or nut products such as almond, peanut, cashew, walnut, pistachio, hazelnut, peanut powder, crushed nuts.
-- sauces: liquid or paste condiments used to flavor food such as soy sauce, fish sauce, oyster sauce, chili sauce, curry paste, dressing, marinade.
-- seafood_shellfish_snails: ingredients derived from aquatic animals such as fish, shrimp, prawn, squid, crab, shellfish, anchovy, oyster, tuna, salmon, fish sauce, oyster sauce.
-- meat_products: meat or poultry ingredients such as chicken, beef, pork, lamb, bacon, ham, gelatin from animal sources.
-- dairy_egg_products: milk, cheese, butter, cream, whey, yogurt, casein, egg, egg yolk, egg white, mayonnaise when clearly egg-based.
-- Plant materials: fruits, vegetables, herbs, spices, legumes, mushrooms, cocoa, sugar, plant oils, seaweed only if clearly used as a plant-like ingredient rather than seafood.
-- Seeds / grains / nuts: wheat, flour, rice, oats, corn, barley, quinoa, rye, sesame, almond, peanut, cashew, walnut, chia, sunflower seed.
-- Processed packaged foods: ingredients that are themselves packaged industrial food products, such as instant noodles, biscuits, cereal bars, chips, candy, canned soup, seasoning sachets, processed snack crumbs.
-- Mixed foods: ingredients that are composite prepared foods containing multiple components, such as curry paste, dumpling filling, burger patty, sausage roll filling, salad dressing, sandwich cookie, chocolate spread.
+Map the ingredients to these rule item keys (use ONLY keys from this list):
+{json.dumps(RULE_KEYS, indent=2)}
 
-Food attribute detection:
-1. processed
-2. dried
-3. plant_based
-4. shelf_stable
-5. canned
-6. retorted 
+Set true if any ingredient belongs to that rule category; false otherwise.
+In category_matches, list the specific triggering ingredients for each true key.
+An ingredient may appear under multiple keys only if genuinely justified.
 
-- processed: foods that have been manufactured or processed from raw ingredients through cooking, grinding, drying, or industrial preparation such as rice paper, noodles, crackers, seasoning powders, packaged snacks, instant noodles, processed seafood snacks.
-- dried: foods that have had moisture removed to preserve them such as dried shrimp, dried chili, dried herbs, dried fish, dried mushrooms.
-- plant_based: ingredients derived from plants such as herbs, spices, vegetables, fruits, grains, legumes, seeds, plant oils, garlic, chili, onion.
-- shelf_stable: foods that can be stored safely at room temperature without refrigeration such as dried foods, canned foods, sealed snack foods, seasoning powders.
-- canned: foods preserved and stored in sealed metal cans such as canned fish, canned vegetables, canned fruit.
-- retorted: foods sterilized by heat in a sealed container or pouch to achieve commercial sterility such as retort pouch meals, canned ready meals, sealed retorted food products.
+Mapping guidance:
+- meat_products            → meat, poultry, pork, beef, lamb, gelatin, lard, tallow
+- dairy_products           → milk, cheese, butter, cream, whey, yogurt, casein, condensed milk
+- whole_eggs               → whole eggs only (not processed egg products)
+- seafood_shellfish_snails → shrimp, prawn, crab, shellfish, scallop, oyster, squid, octopus, snail
+- fish_non_salmonid        → fish other than salmon/trout (tuna, anchovy, tilapia, cod, sardine)
+- fish_salmon_trout        → salmon or trout specifically
+- prawns_products          → prawn or shrimp as primary product
+- nuts                     → almonds, peanuts, cashews, walnuts, pistachios, hazelnuts, macadamia
+- wheat                    → wheat flour, whole wheat (NOT rice flour or other grains)
+- rice                     → cooked/processed rice, rice flour, rice noodles
+- raw_rice                 → uncooked raw rice grains only
+- noodles_pasta            → noodles, pasta, instant noodles, vermicelli
+- biscuits_bread_cakes_pastries → biscuits, crackers, cakes, pastries, bread products
+- chocolate_confectionery  → chocolate, candy, sweets, confectionery
+- spices                   → spices generally (pepper is separate; cumin/coriander/fennel/dried chillies/capsicum are restricted separately)
+- pepper                   → black pepper, white pepper, peppercorns
+- dried_herbs_herbal_teas  → dried herbs, loose herbal teas, dried plant leaves for tea
+- black_green_tea          → black, green, or oolong tea leaves
+- herbal_tea               → herbal infusions (chamomile, peppermint, etc.)
+- sauces                   → sauces, pastes, curry paste, chili sauce, soy sauce, fish sauce, oyster sauce
+- preserved_fruit_vegetables → canned/pickled fruit or vegetables, jam, dried fruit
+- vegetable_oils           → cooking oils, vegetable oil, palm oil, coconut oil, sesame oil
+- honey_products           → honey or honey-derived products
+- maple_syrup              → maple syrup only
+- juice_soft_drink         → fruit juice, soft drink, cordial, energy drink
+- roasted_coffee           → roasted coffee beans, ground coffee, instant coffee
+- green_coffee             → unroasted / green coffee beans
+- kopi_luwak_cviet_coffee  → kopi luwak / civet coffee specifically
+- instant_beverage_sachets → instant coffee sachets, instant milk tea, 3-in-1 drinks
+- vitamins_supplements     → vitamin tablets, mineral supplements, herbal capsules
+- infant_formula           → baby formula, infant formula powder
+- breast_milk              → human breast milk
+- pet_food                 → pet food, animal feed
+- food_from_plane_or_ship  → food taken from aircraft or ship catering
 
-Rules:
-- Return all 11 categories and 6 attributes
-- For each category, output true if at least one ingredient belongs to it, otherwise false.
-- Also return the matched ingredients for each category.
-- An ingredient may appear in more than one category only if strongly justified, but avoid over-tagging.
-- Use general food knowledge for common ingredients and food terms.
-- "Plant materials" includes fruits, vegetables, herbs, legumes, spices, sugar, cocoa, mushrooms, plant oils.
-- "Seeds / grains / nuts" includes wheat, flour, oats, rice, corn, barley, quinoa, sesame, almonds, peanuts, cashews, walnuts, etc.
-- "Processed packaged foods" includes clearly packaged/industrial items like instant noodles, chips, biscuits, cereal bars, seasoning sachets, canned soup, processed snacks.
-- "Mixed foods" should be true only when an ingredient itself is a combined food item, such as curry paste, dumpling filling, sausage roll, burger patty with fillers, chocolate sandwich cookie, mayonnaise-based dressing, or another prepared composite food.
-- If no ingredient belongs to a category, return false and an empty list for that category.
-- Return valid JSON only.
 
-Ingredients:
-{json.dumps(ingredients_raw, ensure_ascii=False)}
+PART 2 — attributes
+
+Infer from product context:
+
+- commercial_packaging:   true if is_commercial_packaged AND packaging is sealed/unknown
+- clean_packaging:        same as commercial_packaging
+- shelf_stable:           true if clearly shelf-stable (sealed, non-perishable, dried, canned)
+- fully_cooked:           true if clearly a cooked/baked/processed food
+- contains_meat:          true if any meat ingredient present
+- personal_use:           always true (travellers carry personal quantities)
+- human_consumption:      true unless clearly pet/animal feed
+- plant_based:            true if main ingredients are plant-derived
+- plant_origin_only:      true if ALL ingredients are 100% plant origin
+- processed:              true if not raw/whole (e.g. rice flour = processed; raw rice = not)
+- dried:                  true if product is dried/dehydrated
+- canned:                 true if product is in a sealed can
+- retorted:               true if canned at high temperature (assume true when canned)
+- roasted:                true if coffee or nuts are clearly roasted
+- instant_use:            true for instant beverages or instant noodles
+- commercially_milled:    true for milled flour / commercially processed wheat
+- botanical_label:        false unless explicitly stated on label
+- fmd_free_country:       false (conservative — cannot verify country of origin)
+- certificate_required:   false by default
+- import_permit_required: false by default
+- personal_use_infant:    false unless product is specifically for infant use
+
+Return valid JSON only.
 """
 
     response = gemini_client.models.generate_content(
