@@ -56,6 +56,14 @@ def apply_classification_and_rules(base_data: dict) -> dict:
 def home():
     return render_template("index.html")
 
+@app.route("/about-us")
+def about_us():
+    return render_template("about-us.html")
+
+@app.route("/user-reports")
+def user_reports():
+    return render_template("user-reports.html")
+
 @app.route("/check-text", methods=["POST"])
 def check_text():
     # check product description

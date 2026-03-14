@@ -24,9 +24,21 @@ function renderFeed(filter = 'all') {
         return;
     }
 
-    feed.innerHTML = filtered.map((r, i) => {
-        const outcomeClass = { allowed: 'badge-green', declared: 'badge-amber', confiscated: 'badge-red', not_travelled: 'badge-muted' }[r.actualOutcome] || 'badge-muted';
-        const outcomeLabel = { allowed: 'Let through', declared: 'Declared & passed', confiscated: 'Confiscated', not_travelled: 'Not travelled' }[r.actualOutcome] || r.actualOutcome;
+    feed.innerHTML = filtered.map((r) => {
+        const outcomeClass = {
+            allowed:      'badge-green',
+            declared:     'badge-amber',
+            confiscated:  'badge-red',
+            other:        'badge-muted',
+        }[r.actualOutcome] || 'badge-muted';
+
+        const outcomeLabel = {
+            allowed:      'Let through',
+            declared:     'Declared & passed',
+            confiscated:  'Confiscated',
+            other:        'Other',
+        }[r.actualOutcome] || r.actualOutcome;
+
         const accuracyBadge = r.accurate === 'yes'
             ? `<span class="accuracy-badge correct">✓ Checker was correct</span>`
             : r.accurate === 'no'
@@ -49,6 +61,7 @@ function renderFeed(filter = 'all') {
     }).join('');
 }
 
+// ── Filter buttons ──
 function filterReports(filter, btn) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -56,19 +69,33 @@ function filterReports(filter, btn) {
 }
 
 // ── Accuracy toggle ──
+// FIX: data-value in HTML is string "true"/"false", compare as string
 function setAccuracy(val) {
-    accuracyValue = val;
-    document.getElementById('accuracyValue').value = val;
+    accuracyValue = val ? 'yes' : 'no';
+    document.getElementById('accuracyValue').value = accuracyValue;
+
+    // FIX: compare against string versions since data-value is always a string
+    const strVal = String(val);
     document.querySelectorAll('.toggle-btn').forEach(b => {
-        b.classList.toggle('active', b.dataset.value === val);
+        b.classList.toggle('active', b.dataset.value === strVal);
     });
 }
 
 // ── Char counter ──
-document.getElementById('itemName').addEventListener('input', function() {
+document.getElementById('itemName').addEventListener('input', function () {
     const len = this.value.length;
     document.getElementById('charCount').textContent = len;
     if (len > 120) this.value = this.value.substring(0, 120);
+});
+
+// ── Radio card selection highlight ──
+// FIX: selector now targets .radio-card (matching updated HTML labels)
+document.querySelectorAll('.radio-card input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+        const group = this.closest('.radio-group');
+        group.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
+        this.closest('.radio-card').classList.add('selected');
+    });
 });
 
 // ── Submit ──
@@ -79,70 +106,79 @@ function submitReport() {
     const details      = document.getElementById('details').value.trim();
     const country      = document.getElementById('originCountry').value;
 
-    if (!item) { highlight('itemName'); return; }
-    if (!checkerSaid) { highlight('checkerSaidGroup'); return; }
+    if (!item)          { highlight('itemName');         return; }
+    if (!checkerSaid)   { highlight('checkerSaidGroup'); return; }
     if (!actualOutcome) { highlight('actualOutcomeGroup'); return; }
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Submitting…`;
+    btn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Submitting…`;
 
     setTimeout(() => {
-        // Prepend new report
         allReports.unshift({
             item, checkerSaid, actualOutcome,
             accurate: accuracyValue || 'unsure',
             details, country, date: 'Just now'
         });
 
-        // Update stats
-        document.getElementById('totalCount').textContent = allReports.length + 240;
-        document.getElementById('recentCount').textContent = parseInt(document.getElementById('recentCount').textContent) + 1;
+        document.getElementById('totalCount').textContent =
+            allReports.length + 240;
+        document.getElementById('recentCount').textContent =
+            parseInt(document.getElementById('recentCount').textContent) + 1;
 
         renderFeed('all');
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         document.querySelector('[data-filter="all"]').classList.add('active');
 
-        // Show success
         btn.style.display = 'none';
         document.getElementById('successMsg').style.display = 'flex';
 
-        // Reset form after delay
         setTimeout(resetForm, 4000);
     }, 900);
 }
 
+// ── Shake validation ──
 function highlight(id) {
     const el = document.getElementById(id);
     el.classList.add('shake');
     el.style.borderColor = '#dc2626';
-    setTimeout(() => { el.classList.remove('shake'); el.style.borderColor = ''; }, 600);
+    setTimeout(() => {
+        el.classList.remove('shake');
+        el.style.borderColor = '';
+    }, 600);
 }
 
+// ── Reset form ──
 function resetForm() {
-    document.getElementById('itemName').value = '';
+    document.getElementById('itemName').value    = '';
     document.getElementById('charCount').textContent = '0';
-    document.getElementById('details').value = '';
+    document.getElementById('details').value     = '';
     document.getElementById('originCountry').value = '';
+
     document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+
+    // FIX: uses .radio-card (matches HTML)
     document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
     document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+
     accuracyValue = '';
+    document.getElementById('accuracyValue').value = '';
+
     const btn = document.getElementById('submitBtn');
     btn.style.display = 'flex';
-    btn.disabled = false;
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Submit Report`;
+    btn.disabled      = false;
+    btn.innerHTML     = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+        Submit Report`;
     document.getElementById('successMsg').style.display = 'none';
 }
-
-// ── Radio card visual selection ──
-document.querySelectorAll('.radio-card input[type="radio"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        const group = this.closest('.radio-group');
-        group.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
-        this.closest('.radio-card').classList.add('selected');
-    });
-});
 
 // ── Init ──
 renderFeed();

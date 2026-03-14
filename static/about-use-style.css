@@ -145,7 +145,6 @@ body {
 }
 .section-heading p { font-size: 0.95rem; color: var(--text-muted); }
 
-/* ── 5-column team grid ── */
 .team-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -224,7 +223,6 @@ body {
     font-weight: 500;
 }
 
-/* ── Footer ── */
 .footer {
     background: var(--green-deep);
     color: rgba(255,255,255,0.65);
