@@ -1,4 +1,5 @@
 import json
+import os
 
 VERDICT_PRIORITY = {
     "DONT_BRING": 3,
@@ -6,26 +7,27 @@ VERDICT_PRIORITY = {
     "BRING_IT": 1
 }
 
-with open("reference.json", "r", encoding="utf-8") as f:
-    reference_rules = json.load(f)
+# load rule
+RULES_PATH = os.path.join(os.path.dirname(__file__), "..", "reference.json")
 
-rules_map = {rule["item"]: rule for rule in reference_rules}
+with open(RULES_PATH, encoding="utf-8") as _f:
+    _RULES = json.load(_f)
+
+RULES_MAP  = {rule["item"]: rule for rule in _RULES}
+RULE_KEYS  = list(RULES_MAP.keys())
 
 
-def check_conditions(rule_conditions, result):
-
-    attributes = result.get("attributes", {})
-
+def check_conditions(rule_conditions: dict, compare_input: dict):
+    attributes = compare_input.get("attributes", {})
     matched = []
-    failed = []
+    failed  = []
     missing = []
 
     for key, value in rule_conditions.items():
 
-        # max_* conditions
+        # max_* → numeric upper bound
         if key.startswith("max_"):
             attr = key.replace("max_", "")
-
             if attr not in attributes:
                 missing.append(key)
             elif attributes[attr] <= value:
@@ -35,17 +37,15 @@ def check_conditions(rule_conditions, result):
 
         # exclusion list
         elif key == "are_not":
-            ingredients = result.get("ingredients_raw", [])
-
+            ingredients = compare_input.get("ingredients_raw", [])
             if not ingredients:
                 missing.append(key)
+            elif any(i.lower() in [v.lower() for v in value] for i in ingredients):
+                failed.append(key)
             else:
-                if any(i in value for i in ingredients):
-                    failed.append(key)
-                else:
-                    matched.append(key)
+                matched.append(key)
 
-        # standard attribute
+        # standard boolean / value check
         else:
             if key not in attributes:
                 missing.append(key)
@@ -58,21 +58,25 @@ def check_conditions(rule_conditions, result):
 
 
 def compare_rules(compare_input: dict) -> dict:
+    # return
+    #   overall_verdict:
+    #   matched_rules:
+    #   reasons:      
+    #   condition_reports:
+    #   rules_applied:   
 
     categories = compare_input.get("categories", {})
 
     final_verdict = "BRING_IT"
     matched_rules = []
-    reasons = []
-    reports = []
+    reasons       = []
+    reports       = []
 
-    for category, is_true in categories.items():
-
-        # skip categories that are not rules
-        if not is_true or category not in rules_map:
+    for rule_key, is_active in categories.items():
+        if not is_active or rule_key not in RULES_MAP:
             continue
 
-        rule = rules_map[category]
+        rule       = RULES_MAP[rule_key]
         conditions = rule.get("conditions", {})
 
         if conditions:
@@ -81,23 +85,23 @@ def compare_rules(compare_input: dict) -> dict:
             matched, failed, missing = [], [], []
 
         reports.append({
-            "item": category,
+            "item":               rule_key,
             "matched_conditions": matched,
-            "failed_conditions": failed,
-            "missing_conditions": missing
+            "failed_conditions":  failed,
+            "missing_conditions": missing,
         })
 
-        matched_rules.append(category)
+        matched_rules.append(rule_key)
         reasons.append(rule["reason"])
 
         verdict = rule["verdict"]
-
         if VERDICT_PRIORITY[verdict] > VERDICT_PRIORITY[final_verdict]:
             final_verdict = verdict
 
     return {
-        "verdict": final_verdict,
-        "matched_rules": matched_rules,
-        "reasons": reasons,
-        "condition_reports": reports
+        "overall_verdict":   final_verdict,
+        "matched_rules":     matched_rules,
+        "reasons":           reasons,
+        "condition_reports": reports,
+        "rules_applied":     [RULES_MAP[k] for k in matched_rules if k in RULES_MAP],
     }

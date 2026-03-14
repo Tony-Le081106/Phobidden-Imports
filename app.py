@@ -38,10 +38,19 @@ def apply_classification_and_rules(base_data: dict) -> dict:
         "ingredients_raw": base_data.get("ingredients_raw", []),
     }
 
-    biosecurity_result = compare_rules(compare_input)
-    base_data["biosecurity_result"] = biosecurity_result
+    compare_result = compare_rules(compare_input)
 
-    return base_data
+    return {
+        **base_data,
+        "categories":        classification["categories"],
+        "category_matches":  classification["category_matches"],
+        "attributes":        classification["attributes"],
+        "overall_verdict":   compare_result["overall_verdict"],
+        "matched_rules":     compare_result["matched_rules"],
+        "reasons":           compare_result["reasons"],
+        "condition_reports": compare_result["condition_reports"],
+        "rules_applied":     compare_result["rules_applied"],
+    }
 
 @app.route("/")
 def home():
@@ -59,7 +68,7 @@ def check_text():
 
     try:
         base_data = extract_from_text(text)
-        result = apply_classification_and_rules(base_data)
+        result    = apply_classification_and_rules(base_data)
 
         return jsonify(result)
 
@@ -108,12 +117,11 @@ def analyze():
 
     if "image" not in request.files:
         return jsonify({"error": "No image uploaded"}), 400
-
+    
     file = request.files["image"]
-
     if file.filename == "":
         return jsonify({"error": "Empty filename"}), 400
-
+    
     mime_type = file.mimetype
     if not allowed_file_mime(mime_type):
         return jsonify({"error": "Only JPG, PNG, WEBP supported"}), 400
@@ -132,16 +140,14 @@ def analyze():
                 return jsonify(apply_classification_and_rules(result))
 
             # gemini fallback when data not found
-            gemini_result = extract_from_image(image_bytes, mime_type)
-            gemini_result["barcode"] = barcode
-            gemini_result["source"] = "gemini_fallback_after_barcode"
-
-            return jsonify(apply_classification_and_rules(gemini_result))
+            base_data = extract_from_image(image_bytes, mime_type)
+            base_data["barcode"] = barcode
+            base_data["source"]  = "gemini_fallback_after_barcode"
+            return jsonify(apply_classification_and_rules(base_data))
 
         # no barcode gemini
-        result = extract_from_image(image_bytes, mime_type)
-
-        return jsonify(apply_classification_and_rules(result))
+        base_data = extract_from_image(image_bytes, mime_type)
+        return jsonify(apply_classification_and_rules(base_data))
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
