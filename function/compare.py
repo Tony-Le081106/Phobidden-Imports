@@ -57,9 +57,9 @@ def check_conditions(rule_conditions, result):
     return matched, failed, missing
 
 
-def compare_rules(result):
+def compare_rules(compare_input: dict) -> dict:
 
-    categories = result.get("categories", {})
+    categories = compare_input.get("categories", {})
 
     final_verdict = "BRING_IT"
     matched_rules = []
@@ -76,7 +76,7 @@ def compare_rules(result):
         conditions = rule.get("conditions", {})
 
         if conditions:
-            matched, failed, missing = check_conditions(conditions, result)
+            matched, failed, missing = check_conditions(conditions, compare_input)
         else:
             matched, failed, missing = [], [], []
 

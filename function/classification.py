@@ -24,6 +24,10 @@ RULE_KEYS  = list(RULES_MAP.keys())
 
 def classify_for_rules(base_data: dict) -> dict:
     # classify to match rule
+    # output
+    #   categories:
+    #   category_matches:
+    #   attributes
     ingredients_raw = base_data.get("ingredients_raw", [])
     product_name    = base_data.get("product_name") or "Unknown"
     is_commercial   = base_data.get("is_commercial_packaged", False)

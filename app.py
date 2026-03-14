@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from google import genai
 
-from function.classification import classify_ingredients_to_categories
+from function.classification import classify_for_rules
 from function.compare import compare_rules
 from function.ingredient_extraction import (
     detect_barcode,
@@ -30,13 +30,15 @@ gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 def allowed_file_mime(mime_type: str):
     return mime_type in {"image/jpeg", "image/png", "image/webp"}
 
-def apply_classification_and_rules(base_data):
-    classification = classify_ingredients_to_categories(
-        base_data.get("ingredients_raw", [])
-    )
-    base_data.update(classification)
+def apply_classification_and_rules(base_data: dict) -> dict:
+    classification = classify_for_rules(base_data)
+    compare_input = {
+        "categories":      classification["categories"],
+        "attributes":      classification["attributes"],
+        "ingredients_raw": base_data.get("ingredients_raw", []),
+    }
 
-    biosecurity_result = compare_rules(base_data)
+    biosecurity_result = compare_rules(compare_input)
     base_data["biosecurity_result"] = biosecurity_result
 
     return base_data
