@@ -1,5 +1,5 @@
 import os
-
+import json
 
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
@@ -30,6 +30,58 @@ gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 def allowed_file_mime(mime_type: str):
     return mime_type in {"image/jpeg", "image/png", "image/webp"}
 
+
+def enrich_verdict(base_data: dict, compare_result: dict) -> dict:
+    """
+    Gemini writes verdict_reason + key_concerns based on the rule-engine output.
+    Does NOT override the verdict — just makes it human-readable.
+    """
+    schema = {
+        "type": "object",
+        "properties": {
+            "verdict_reason": {"type": "string"},
+            "key_concerns":   {"type": "array", "items": {"type": "string"}},
+        },
+        "required": ["verdict_reason", "key_concerns"],
+    }
+
+    prompt = f"""
+You are an Australian biosecurity advisor writing traveller-facing guidance.
+
+Product: {base_data.get("product_name") or "Unknown"}
+Ingredients: {', '.join(base_data.get("ingredients_raw", []))}
+
+The rule engine has determined:
+  Verdict:          {compare_result["overall_verdict"]}
+  Matched rules:    {', '.join(compare_result["matched_rules"])}
+  Rule reasons:     {json.dumps(compare_result["reasons"])}
+
+Your task:
+1. verdict_reason — one sentence explaining WHY this verdict applies to THIS product.
+   Be specific: name the problematic ingredients or category. Do not just copy the rule text.
+   Keep it simple and direct.
+
+2. key_concerns — 2 to 4 short actionable bullet points for the traveller:
+   - For BRING_IT:    what to still watch out for (quantity limits, declare-if-unsure risks)
+   - For DECLARE_IT:  exactly what the traveller should do at border customs
+   - For DONT_BRING:  why it's prohibited and what happens if confiscated
+
+Keep language simple, helpful, and direct. Avoid jargon. Return valid JSON only.
+"""
+
+    response = gemini_client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config={
+            "response_mime_type": "application/json",
+            "response_json_schema": schema,
+            "temperature": 0,
+        },
+    )
+
+    return json.loads(response.text)
+
+
 def apply_classification_and_rules(base_data: dict) -> dict:
     classification = classify_for_rules(base_data)
     compare_input = {
@@ -39,6 +91,9 @@ def apply_classification_and_rules(base_data: dict) -> dict:
     }
 
     compare_result = compare_rules(compare_input)
+
+    # Enrich with human-readable explanations
+    enrichment = enrich_verdict(base_data, compare_result)
 
     return {
         **base_data,
@@ -50,6 +105,8 @@ def apply_classification_and_rules(base_data: dict) -> dict:
         "reasons":           compare_result["reasons"],
         "condition_reports": compare_result["condition_reports"],
         "rules_applied":     compare_result["rules_applied"],
+        "verdict_reason":    enrichment["verdict_reason"],
+        "key_concerns":      enrichment["key_concerns"],
     }
 
 @app.route("/")

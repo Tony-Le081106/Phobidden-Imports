@@ -96,6 +96,25 @@ Rules:
 - barcode: null if not clearly visible
 - input_type: ["image"]
 - ingredients_raw: only what is clearly visible or strongly implied; empty array if unsure
+- Extract ONLY from what you can SEE in the image
+- Do NOT hallucinate or assume standard recipes
+- Do NOT add "flour", "sugar", "oil" unless clearly visible on packaging/label
+- For packaged items, read the label if visible
+- If unsure about ingredients, return empty array rather than guess
+
+IMPORTANT - RICE IDENTIFICATION FROM APPEARANCE:
+- RAW RICE: dry appearance, individual whole grains visible, NOT clumped together
+  → Add "raw rice" or "uncooked rice" to ingredients (NOT just "rice")
+  Example: If you see a bowl of dry individual grains → ingredient = "raw rice"
+  
+- COOKED RICE: soft moist texture, grains clumped/sticky, fluffy appearance
+  → Add "cooked rice" to ingredients (NOT just "rice")
+  Example: If you see fluffy/moist rice → ingredient = "cooked rice"
+
+- RICE FLOUR/NOODLES/PRODUCTS: Fine powder or noodle form
+  → Add "rice flour", "rice noodles", etc (be specific about form)
+
+Return JSON only.
 """
 
     response = gemini_client.models.generate_content(
@@ -107,6 +126,7 @@ Rules:
         config={
             "response_mime_type": "application/json",
             "response_json_schema": schema,
+            "temperature": 0,           # deterministic output — same input → same result
         },
     )
 
@@ -140,8 +160,8 @@ You are a food ingredient extraction assistant for Australian border biosecurity
 The user is describing an item they want to bring into Australia.
 Extract every ingredient or food component — explicitly stated AND strongly implied.
 
-For named dishes (e.g. "bánh mì", "pho", "sushi"), include typical ingredients.
-For packaged products (e.g. "Indomie noodles"), include known ingredients.
+For named dishes (e.g. "sandwich", "curry", "sushi"), include typical ingredients.
+For packaged products (e.g. "instant noodles"), include known ingredients.
 Be thorough. Do not invent ingredients not implied by the input.
 
 User input: "{text}"
@@ -155,6 +175,7 @@ Return valid JSON only.
         config={
             "response_mime_type": "application/json",
             "response_json_schema": schema,
+            "temperature": 0,           # deterministic output — same input → same result
         },
     )
 

@@ -94,8 +94,9 @@ Packaging state: {packaging_state}
 Homemade: {is_homemade}
 Ingredients: {json.dumps(ingredients_raw, ensure_ascii=False)}
 
+═══════════════════════════════════════════════════════
 PART 1 — categories + category_matches
-
+═══════════════════════════════════════════════════════
 Map the ingredients to these rule item keys (use ONLY keys from this list):
 {json.dumps(RULE_KEYS, indent=2)}
 
@@ -113,8 +114,8 @@ Mapping guidance:
 - prawns_products          → prawn or shrimp as primary product
 - nuts                     → almonds, peanuts, cashews, walnuts, pistachios, hazelnuts, macadamia
 - wheat                    → wheat flour, whole wheat (NOT rice flour or other grains)
-- rice                     → cooked/processed rice, rice flour, rice noodles
-- raw_rice                 → uncooked raw rice grains only
+- rice                     → PROCESSED rice only: rice flour, rice noodles, cooked rice, rice crackers, rice cakes
+- raw_rice                 → UNPROCESSED: raw rice grains, uncooked rice, whole rice kernels only (NOT flour or noodles)
 - noodles_pasta            → noodles, pasta, instant noodles, vermicelli
 - biscuits_bread_cakes_pastries → biscuits, crackers, cakes, pastries, bread products
 - chocolate_confectionery  → chocolate, candy, sweets, confectionery
@@ -139,10 +140,34 @@ Mapping guidance:
 - pet_food                 → pet food, animal feed
 - food_from_plane_or_ship  → food taken from aircraft or ship catering
 
+⚠️ CRITICAL DISTINCTION: rice vs raw_rice
+The KEY difference is the "processed" attribute:
+- "rice" = PROCESSED form (flour, noodles, cooked, crackers) → processed: true
+- "raw_rice" = UNPROCESSED form (raw grains, whole kernels) → processed: false
 
+EXPLICIT RULES FOR RICE DETECTION:
+1. If ingredient contains word "cooked" → rice=TRUE, raw_rice=FALSE, processed=TRUE
+   (e.g. "cooked rice", "cooked rice dish")
+2. If ingredient contains words "raw" OR "uncooked" or "grains" → rice=FALSE, raw_rice=TRUE, processed=FALSE
+   (e.g. "raw rice", "uncooked rice", "rice grains", "white rice grains")
+3. If ingredient is "flour" or "noodles" or "crackers" → rice=TRUE, raw_rice=FALSE, processed=TRUE
+4. If ingredient is just "rice" with NO modifier:
+   → ASSUME processed=TRUE (safer default) → rice=TRUE, raw_rice=FALSE
+   → ONLY use raw_rice=TRUE if explicitly said to be unprocessed
+
+EXAMPLES:
+  - "Rice flour" → rice: TRUE, raw_rice: FALSE, processed: TRUE
+  - "Rice noodles" → rice: TRUE, raw_rice: FALSE, processed: TRUE
+  - "Cooked rice" → rice: TRUE, raw_rice: FALSE, processed: TRUE
+  - "Raw rice grains" / "Uncooked rice" → rice: FALSE, raw_rice: TRUE, processed: FALSE
+  - "Brown rice (whole)" → rice: FALSE, raw_rice: TRUE, processed: FALSE
+  - Just "rice" (no context) → rice: TRUE, raw_rice: FALSE, processed: TRUE
+
+═══════════════════════════════════════════════════════
 PART 2 — attributes
-
+═══════════════════════════════════════════════════════
 Infer from product context:
+
 
 - commercial_packaging:   true if is_commercial_packaged AND packaging is sealed/unknown
 - clean_packaging:        same as commercial_packaging
@@ -153,8 +178,13 @@ Infer from product context:
 - human_consumption:      true unless clearly pet/animal feed
 - plant_based:            true if main ingredients are plant-derived
 - plant_origin_only:      true if ALL ingredients are 100% plant origin
-- processed:              true if not raw/whole (e.g. rice flour = processed; raw rice = not)
-- dried:                  true if product is dried/dehydrated
+- processed:              CRITICAL: true if ingredient has been manufactured/transformed from raw form
+                          INCLUDES: cooked products, flour, noodles, ground/milled products, instant products, canned products
+                          EXCLUDES: raw grains, uncooked whole ingredients, raw vegetables/fruits
+                          KEY RULE: If says "cooked" anywhere → processed=TRUE
+                          Examples: rice flour = TRUE, rice noodles = TRUE, cooked rice = TRUE
+                          BUT: raw rice grains = FALSE, uncooked rice = FALSE, whole rice = FALSE
+- dried:                  true if product is dried/dehydrated (can be TRUE even if processed is FALSE)
 - canned:                 true if product is in a sealed can
 - retorted:               true if canned at high temperature (assume true when canned)
 - roasted:                true if coffee or nuts are clearly roasted
@@ -175,6 +205,7 @@ Return valid JSON only.
         config={
             "response_mime_type": "application/json",
             "response_json_schema": schema,
+            "temperature": 0,           # deterministic output — same input → same result
         },
     )
 
