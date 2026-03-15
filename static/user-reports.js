@@ -16,7 +16,7 @@ let accuracyValue = '';
 function renderFeed(filter = 'all') {
     const feed = document.getElementById('reportsFeed');
     let filtered = allReports;
-    if (filter === 'wrong')       filtered = allReports.filter(r => r.accurate === 'no');
+    if (filter === 'wrong') filtered = allReports.filter(r => r.accurate === 'no');
     if (filter === 'confiscated') filtered = allReports.filter(r => r.actualOutcome === 'confiscated');
 
     if (filtered.length === 0) {
@@ -26,24 +26,24 @@ function renderFeed(filter = 'all') {
 
     feed.innerHTML = filtered.map((r) => {
         const outcomeClass = {
-            allowed:      'badge-green',
-            declared:     'badge-amber',
-            confiscated:  'badge-red',
-            other:        'badge-muted',
+            allowed: 'badge-green',
+            declared: 'badge-amber',
+            confiscated: 'badge-red',
+            other: 'badge-muted',
         }[r.actualOutcome] || 'badge-muted';
 
         const outcomeLabel = {
-            allowed:      'Let through',
-            declared:     'Declared & passed',
-            confiscated:  'Confiscated',
-            other:        'Other',
+            allowed: 'Let through',
+            declared: 'Declared & passed',
+            confiscated: 'Confiscated',
+            other: 'Other',
         }[r.actualOutcome] || r.actualOutcome;
 
         const accuracyBadge = r.accurate === 'yes'
             ? `<span class="accuracy-badge correct">✓ Checker was correct</span>`
             : r.accurate === 'no'
-            ? `<span class="accuracy-badge wrong">✗ Checker was wrong</span>`
-            : '';
+                ? `<span class="accuracy-badge wrong">✗ Checker was wrong</span>`
+                : '';
 
         return `
         <div class="report-card" data-outcome="${r.actualOutcome}" data-accurate="${r.accurate}">
@@ -100,14 +100,14 @@ document.querySelectorAll('.radio-card input[type="radio"]').forEach(radio => {
 
 // ── Submit ──
 function submitReport() {
-    const item         = document.getElementById('itemName').value.trim();
-    const checkerSaid  = document.querySelector('input[name="checkerSaid"]:checked')?.value;
+    const item = document.getElementById('itemName').value.trim();
+    const checkerSaid = document.querySelector('input[name="checkerSaid"]:checked')?.value;
     const actualOutcome = document.querySelector('input[name="actualOutcome"]:checked')?.value;
-    const details      = document.getElementById('details').value.trim();
-    const country      = document.getElementById('originCountry').value;
+    const details = document.getElementById('details').value.trim();
+    const country = document.getElementById('originCountry').value;
 
-    if (!item)          { highlight('itemName');         return; }
-    if (!checkerSaid)   { highlight('checkerSaidGroup'); return; }
+    if (!item) { highlight('itemName'); return; }
+    if (!checkerSaid) { highlight('checkerSaidGroup'); return; }
     if (!actualOutcome) { highlight('actualOutcomeGroup'); return; }
 
     const btn = document.getElementById('submitBtn');
@@ -141,7 +141,7 @@ function submitReport() {
     }, 900);
 }
 
-// ── Shake validation ──
+//Shake validation 
 function highlight(id) {
     const el = document.getElementById(id);
     el.classList.add('shake');
@@ -152,16 +152,15 @@ function highlight(id) {
     }, 600);
 }
 
-// ── Reset form ──
+//Reset form
 function resetForm() {
-    document.getElementById('itemName').value    = '';
+    document.getElementById('itemName').value = '';
     document.getElementById('charCount').textContent = '0';
-    document.getElementById('details').value     = '';
+    document.getElementById('details').value = '';
     document.getElementById('originCountry').value = '';
 
     document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
 
-    // FIX: uses .radio-card (matches HTML)
     document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
     document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
 
@@ -170,8 +169,8 @@ function resetForm() {
 
     const btn = document.getElementById('submitBtn');
     btn.style.display = 'flex';
-    btn.disabled      = false;
-    btn.innerHTML     = `
+    btn.disabled = false;
+    btn.innerHTML = `
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="22" y1="2" x2="11" y2="13"></line>
             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -180,5 +179,5 @@ function resetForm() {
     document.getElementById('successMsg').style.display = 'none';
 }
 
-// ── Init ──
+//Init 
 renderFeed();

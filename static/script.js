@@ -53,16 +53,16 @@ imageInput.addEventListener('change', e => {
 imageUploadArea.addEventListener('dragover', e => {
   e.preventDefault();
   imageUploadArea.style.borderColor = 'var(--green-mid)';
-  imageUploadArea.style.background  = 'var(--green-light)';
+  imageUploadArea.style.background = 'var(--green-light)';
 });
 imageUploadArea.addEventListener('dragleave', () => {
   imageUploadArea.style.borderColor = '';
-  imageUploadArea.style.background  = '';
+  imageUploadArea.style.background = '';
 });
 imageUploadArea.addEventListener('drop', e => {
   e.preventDefault();
   imageUploadArea.style.borderColor = '';
-  imageUploadArea.style.background  = '';
+  imageUploadArea.style.background = '';
   const file = e.dataTransfer.files[0];
   if (file && file.type.startsWith('image/')) {
     selectedFile = file;
@@ -120,7 +120,7 @@ async function submitImage(file) {
 }
 
 function showLoading() {
-  inputSection.style.display  = 'none';
+  inputSection.style.display = 'none';
   resultSection.style.display = 'block';
   resultCard.innerHTML = `
     <div class="loading-state">
@@ -131,14 +131,14 @@ function showLoading() {
 }
 
 function showResult(data) {
-  inputSection.style.display  = 'none';
+  inputSection.style.display = 'none';
   resultSection.style.display = 'block';
-  resultCard.innerHTML        = buildResultHTML(data);
+  resultCard.innerHTML = buildResultHTML(data);
   resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function showError(message) {
-  inputSection.style.display  = 'none';
+  inputSection.style.display = 'none';
   resultSection.style.display = 'block';
   resultCard.innerHTML = `
     <div class="result-error">
@@ -154,44 +154,44 @@ function showError(message) {
 
 checkAnotherBtn.addEventListener('click', () => {
   resultSection.style.display = 'none';
-  inputSection.style.display  = 'block';
+  inputSection.style.display = 'block';
   // Reset state
-  textInput.value      = '';
-  selectedFile         = null;
-  imagePreview.src     = '';
+  textInput.value = '';
+  selectedFile = null;
+  imagePreview.src = '';
   imagePreview.style.display = 'none';
-  imageInput.value     = '';
+  imageInput.value = '';
   setMode('text');
   inputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 const VERDICT_CONFIG = {
   BRING_IT: {
-    label:      'Safe to Bring',
-    sublabel:   'This item appears to meet Australian biosecurity requirements.',
-    icon:       `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+    label: 'Safe to Bring',
+    sublabel: 'This item appears to meet Australian biosecurity requirements.',
+    icon: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
     headerClass: 'verdict-header--bring',
-    badgeClass:  'verdict-badge--bring',
+    badgeClass: 'verdict-badge--bring',
   },
   DECLARE_IT: {
-    label:      'Declare at Border',
-    sublabel:   'You can bring this, but you MUST declare it at the biosecurity counter on arrival.',
-    icon:       `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    label: 'Declare at Border',
+    sublabel: 'You can bring this, but you MUST declare it at the biosecurity counter on arrival.',
+    icon: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
     headerClass: 'verdict-header--declare',
-    badgeClass:  'verdict-badge--declare',
+    badgeClass: 'verdict-badge--declare',
   },
   DONT_BRING: {
-    label:      'Do Not Bring',
-    sublabel:   'This item is prohibited and will be confiscated or destroyed at the border.',
-    icon:       `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    label: 'Do Not Bring',
+    sublabel: 'This item is prohibited and will be confiscated or destroyed at the border.',
+    icon: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
     headerClass: 'verdict-header--dont',
-    badgeClass:  'verdict-badge--dont',
+    badgeClass: 'verdict-badge--dont',
   },
 };
 
 function buildResultHTML(data) {
   const verdict = data.overall_verdict || 'DECLARE_IT';
-  const cfg     = VERDICT_CONFIG[verdict] || VERDICT_CONFIG.DECLARE_IT;
+  const cfg = VERDICT_CONFIG[verdict] || VERDICT_CONFIG.DECLARE_IT;
 
   // Product name / barcode header
   const productLine = data.product_name
@@ -270,12 +270,12 @@ function buildResultHTML(data) {
 
       <div class="result-body">
         ${productLine || barcodeLine
-          ? `<div class="result-meta">${productLine}${barcodeLine}</div>`
-          : ''}
+      ? `<div class="result-meta">${productLine}${barcodeLine}</div>`
+      : ''}
 
         ${data.verdict_reason
-          ? `<p class="verdict-reason-text">${escHtml(data.verdict_reason)}</p>`
-          : ''}
+      ? `<p class="verdict-reason-text">${escHtml(data.verdict_reason)}</p>`
+      : ''}
 
         ${concernsHTML}
         ${categoryTags}

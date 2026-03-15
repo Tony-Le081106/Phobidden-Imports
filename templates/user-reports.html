@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,11 +8,13 @@
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="/static/user-reports-style.css">
 </head>
+
 <body>
 
     <header class="header">
         <div class="container header-content">
-            <svg class="shield-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="shield-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             </svg>
             <div>
@@ -42,7 +45,8 @@
                 Community-Powered
             </div>
             <h2>Help us get it <em>right</em></h2>
-            <p class="hero-sub">Our data isn't perfect. If our checker gave you wrong advice - or if you want to share what actually happened at the border - your report helps every future traveller.</p>
+            <p class="hero-sub">Our data isn't perfect. If our checker gave you wrong advice - or if you want to share
+                what actually happened at the border - your report helps every future traveller.</p>
         </div>
     </section>
 
@@ -64,7 +68,8 @@
                             <span class="step-num">1</span>
                             What item are you reporting?
                         </div>
-                        <input type="text" id="itemName" placeholder="e.g., Bánh tráng trộn, dried mango, honey candy..." class="text-input">
+                        <input type="text" id="itemName"
+                            placeholder="e.g., Bánh tráng trộn, dried mango, honey candy..." class="text-input">
                         <div class="char-count"><span id="charCount">0</span> / 120</div>
                     </div>
 
@@ -77,22 +82,42 @@
                         <div class="radio-group" id="checkerSaidGroup">
                             <label class="radio-card green">
                                 <input type="radio" name="checkerSaid" value="allowed">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg>
                                 Allowed
                             </label>
                             <label class="radio-card amber">
                                 <input type="radio" name="checkerSaid" value="declare">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
                                 Must Declare
                             </label>
                             <label class="radio-card red">
                                 <input type="radio" name="checkerSaid" value="prohibited">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="15" y1="9" x2="9" y2="15" />
+                                    <line x1="9" y1="9" x2="15" y2="15" />
+                                </svg>
                                 Prohibited
                             </label>
                             <label class="radio-card muted">
                                 <input type="radio" name="checkerSaid" value="didnt_check">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
                                 Didn't check
                             </label>
                         </div>
@@ -107,22 +132,42 @@
                         <div class="radio-group" id="actualOutcomeGroup">
                             <label class="radio-card green">
                                 <input type="radio" name="actualOutcome" value="allowed">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg>
                                 Let through
                             </label>
                             <label class="radio-card amber">
                                 <input type="radio" name="actualOutcome" value="declared">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
                                 Declared &amp; passed
                             </label>
                             <label class="radio-card red">
                                 <input type="radio" name="actualOutcome" value="confiscated">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="15" y1="9" x2="9" y2="15" />
+                                    <line x1="9" y1="9" x2="15" y2="15" />
+                                </svg>
                                 Confiscated
                             </label>
                             <label class="radio-card muted">
                                 <input type="radio" name="actualOutcome" value="not_travelled">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="12" y1="8" x2="12" y2="12" />
+                                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                                </svg>
                                 Haven't travelled yet
                             </label>
                         </div>
@@ -136,15 +181,27 @@
                         </div>
                         <div class="accuracy-toggle" id="accuracyToggle">
                             <button class="toggle-btn" data-value="yes" onclick="setAccuracy('yes')">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M20 6L9 17l-5-5" />
+                                </svg>
                                 Yes, it was correct
                             </button>
                             <button class="toggle-btn" data-value="no" onclick="setAccuracy('no')">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
                                 No, it was wrong
                             </button>
                             <button class="toggle-btn" data-value="unsure" onclick="setAccuracy('unsure')">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
                                 Not sure
                             </button>
                         </div>
@@ -157,8 +214,11 @@
                             <span class="step-num">5</span>
                             Any extra details? <span class="optional-tag">optional</span>
                         </div>
-                        <textarea id="details" placeholder="e.g., The officer said it was fine because it was commercially sealed. The packaging was in Vietnamese with no English label..." rows="4"></textarea>
-                        <div class="form-hint">Your details help others in the same situation. No personal info needed.</div>
+                        <textarea id="details"
+                            placeholder="e.g., The officer said it was fine because it was commercially sealed. The packaging was in Vietnamese with no English label..."
+                            rows="4"></textarea>
+                        <div class="form-hint">Your details help others in the same situation. No personal info needed.
+                        </div>
                     </div>
 
                     <!-- Origin country -->
@@ -184,7 +244,8 @@
                     </div>
 
                     <button class="btn-primary" id="submitBtn" onclick="submitReport()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <line x1="22" y1="2" x2="11" y2="13"></line>
                             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                         </svg>
@@ -193,7 +254,11 @@
 
                     <!-- Success state -->
                     <div id="successMsg" class="success-msg" style="display:none;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
                         <div>
                             <strong>Report submitted — thank you!</strong>
                             <p>Your experience will help improve results for future travellers.</p>
@@ -226,9 +291,12 @@
             <div class="feed-header">
                 <h3>Recent reports</h3>
                 <div class="filter-row">
-                    <button class="filter-btn active" data-filter="all" onclick="filterReports('all', this)">All</button>
-                    <button class="filter-btn" data-filter="wrong" onclick="filterReports('wrong', this)">Checker was wrong</button>
-                    <button class="filter-btn" data-filter="confiscated" onclick="filterReports('confiscated', this)">Confiscated</button>
+                    <button class="filter-btn active" data-filter="all"
+                        onclick="filterReports('all', this)">All</button>
+                    <button class="filter-btn" data-filter="wrong" onclick="filterReports('wrong', this)">Checker was
+                        wrong</button>
+                    <button class="filter-btn" data-filter="confiscated"
+                        onclick="filterReports('confiscated', this)">Confiscated</button>
                 </div>
             </div>
 
@@ -248,4 +316,5 @@
     <script src="/static/user-reports.js"></script>
 
 </body>
+
 </html>
